@@ -1,7 +1,7 @@
 # Ripple — AI/NLP Risk Engine & Stress-Test Platform
 # S&P Global & CRISIL Campus Hackathon 2026
 
-**Status:** Phase 1 — data ingestion scaffold.
+**Status:** Phase 2 complete — Ingestion scaffold + FinBERT sentiment, Event classification, and Entity enrichment.
 
 ## What is Ripple?
 
@@ -23,10 +23,16 @@ pip install -r requirements.txt
 # 3. Copy .env.example to .env, fill in optional keys
 copy .env.example .env
 
-# 4. Fetch 7 days of articles and cache them locally
+# 4. Fetch 7 days of articles and cache them locally (Phase 1)
 python scripts/fetch_history.py --start 2026-10-10 --end 2026-10-17 --query "bank OR default OR inflation"
 
-# 5. Run tests
+# 5. Run NLP Evaluation & Metrics Report (Phase 2)
+python scripts/eval_nlp.py
+
+# 6. Run 500-Document CPU Benchmark (Phase 2)
+python scripts/benchmark_500_docs.py
+
+# 7. Run full test suite
 pytest -v
 ```
 

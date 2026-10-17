@@ -1,0 +1,76 @@
+entity_type,id,name,sector,country,aliases
+company,JPM,JPMorgan Chase & Co.,Financials,United States,JPMorgan|JP Morgan|Chase|J.P. Morgan
+company,BAC,Bank of America,Financials,United States,Bank of America|BofA|BoA
+company,C,Citigroup,Financials,United States,Citigroup|Citi|Citibank
+company,WFC,Wells Fargo,Financials,United States,Wells Fargo
+company,GS,Goldman Sachs,Financials,United States,Goldman Sachs|Goldman
+company,MS,Morgan Stanley,Financials,United States,Morgan Stanley
+company,HSBC,HSBC Holdings,Financials,United Kingdom,HSBC|Hongkong and Shanghai Banking Corporation
+company,BARC,Barclays,Financials,United Kingdom,Barclays
+company,UBS,UBS Group,Financials,Switzerland,UBS|UBS Group|Credit Suisse
+company,BNP,BNP Paribas,Financials,France,BNP Paribas|BNP
+company,DB,Deutsche Bank,Financials,Germany,Deutsche Bank|Deutsche
+company,SAN,Banco Santander,Financials,Spain,Santander|Banco Santander
+company,XOM,ExxonMobil,Energy,United States,ExxonMobil|Exxon|Mobil
+company,CVX,Chevron,Energy,United States,Chevron
+company,SHEL,Shell plc,Energy,United Kingdom,Shell|Royal Dutch Shell
+company,BP,BP plc,Energy,United Kingdom,BP|British Petroleum
+company,TTE,TotalEnergies,Energy,France,TotalEnergies|Total
+company,AAPL,Apple Inc.,Technology,United States,Apple
+company,MSFT,Microsoft Corporation,Technology,United States,Microsoft
+company,GOOGL,Alphabet Inc.,Technology,United States,Google|Alphabet
+company,AMZN,Amazon.com Inc.,Technology,United States,Amazon|AWS
+company,NVDA,Nvidia Corporation,Technology,United States,Nvidia
+company,META,Meta Platforms Inc.,Technology,United States,Meta|Facebook
+company,TSLA,Tesla Inc.,Consumer Discretionary,United States,Tesla
+company,BA,The Boeing Company,Industrials,United States,Boeing
+company,CAT,Caterpillar Inc.,Industrials,United States,Caterpillar
+company,GE,GE Aerospace,Industrials,United States,General Electric|GE|GE Aerospace
+company,F,Ford Motor Company,Consumer Discretionary,United States,Ford|Ford Motor
+company,GM,General Motors,Consumer Discretionary,United States,General Motors|GM
+company,VOW3,Volkswagen AG,Consumer Discretionary,Germany,Volkswagen|VW
+company,TM,Toyota Motor Corporation,Consumer Discretionary,Japan,Toyota
+company,PFE,Pfizer Inc.,Healthcare,United States,Pfizer
+company,JNJ,Johnson & Johnson,Healthcare,United States,Johnson & Johnson|J&J
+company,WMT,Walmart Inc.,Consumer Staples,United States,Walmart
+company,PG,Procter & Gamble,Consumer Staples,United States,Procter & Gamble|P&G
+company,T,AT&T Inc.,Telecommunications,United States,AT&T
+company,VZ,Verizon Communications,Telecommunications,United States,Verizon
+company,RIO,Rio Tinto Group,Materials,United Kingdom,Rio Tinto
+company,VALE,Vale S.A.,Materials,Brazil,Vale
+company,PLD,Prologis Inc.,Real Estate,United States,Prologis
+company,SPG,Simon Property Group,Real Estate,United States,Simon Property|SPG
+company,EQIX,Equinix Inc.,Real Estate,United States,Equinix
+company,SVB,Silicon Valley Bank,Financials,United States,Silicon Valley Bank|SVB
+sector,SEC_FIN,Financials,Financials,,Financials|Banking|Banks|Lenders|Asset Management|Insurance
+sector,SEC_ENG,Energy,Energy,,Energy|Oil & Gas|Petroleum|Renewables|Clean Energy
+sector,SEC_TECH,Technology,Technology,,Technology|Tech|Software|Semiconductors|Hardware|Cloud
+sector,SEC_IND,Industrials,Industrials,,Industrials|Manufacturing|Aerospace|Defense|Machinery
+sector,SEC_CONS_DISC,Consumer Discretionary,Consumer Discretionary,,Consumer Discretionary|Automotive|Autos|Retail|Luxury
+sector,SEC_CONS_STAP,Consumer Staples,Consumer Staples,,Consumer Staples|Food|Beverage|Household
+sector,SEC_HEALTH,Healthcare,Healthcare,,Healthcare|Pharma|Pharmaceuticals|Biotech|Medical
+sector,SEC_REAL_EST,Real Estate,Real Estate,,Real Estate|Commercial Real Estate|CRE|REIT|REITs|Housing|Property
+sector,SEC_MAT,Materials,Materials,,Materials|Metals|Mining|Chemicals|Steel
+sector,SEC_UTIL,Utilities,Utilities,,Utilities|Power|Electric Utilities|Gas Utilities
+sector,SEC_TEL,Telecommunications,Telecommunications,,Telecommunications|Telecom|Wireless|Broadband
+country,US,United States,,United States,United States|US|USA|U.S.|America
+country,UK,United Kingdom,,United Kingdom,United Kingdom|UK|U.K.|Britain|England
+country,DE,Germany,,Germany,Germany|German|Deutschland
+country,FR,France,,France,France|French
+country,JP,Japan,,Japan,Japan|Japanese
+country,CN,China,,China,China|Chinese|Beijing|PRC
+country,IN,India,,India,India|Indian
+country,SA,Saudi Arabia,,Saudi Arabia,Saudi Arabia|Saudi|Riyadh|KSA
+country,RU,Russia,,Russia,Russia|Russian|Moscow
+country,BR,Brazil,,Brazil,Brazil|Brazilian
+country,CA,Canada,,Canada,Canada|Canadian
+country,AU,Australia,,Australia,Australia|Australian
+country,CH,Switzerland,,Switzerland,Switzerland|Swiss
+country,KR,South Korea,,South Korea,South Korea|Korea|Korean
+commodity,COM_OIL,Crude Oil,Energy,,Crude Oil|Oil|Brent|WTI|Petroleum
+commodity,COM_GAS,Natural Gas,Energy,,Natural Gas|Gas|LNG
+commodity,COM_GOLD,Gold,Materials,,Gold|Bullion
+commodity,COM_COPPER,Copper,Materials,,Copper
+commodity,COM_WHEAT,Wheat,Consumer Staples,,Wheat|Grain|Crops
+commodity,COM_LITHIUM,Lithium,Materials,,Lithium|Battery Metals
+commodity,COM_CHIPS,Semiconductors,Technology,,Semiconductors|Chips|Microchips

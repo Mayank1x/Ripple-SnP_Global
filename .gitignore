@@ -39,6 +39,8 @@ data/raw/tweets/*.csv
 !data/raw/rss/.gitkeep
 data/audit/*
 !data/audit/.gitkeep
+data/cache/**/*.json
+!data/cache/**/.gitkeep
 
 # Model cache
 models/

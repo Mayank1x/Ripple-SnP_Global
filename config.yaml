@@ -43,3 +43,13 @@ ingest:
     enabled: true
     # Only keep articles whose language field equals this (case-insensitive)
     keep_language: "english"
+
+nlp:
+  cache_dir: "data/cache"
+  sentiment:
+    model_name: "ProsusAI/finbert"
+    batch_size: 16
+  events:
+    provider: "zero_shot"  # options: "zero_shot", "gemini"
+    zero_shot_model: "facebook/bart-large-mnli"
+

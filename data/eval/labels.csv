@@ -1,0 +1,61 @@
+id,title,true_event_type,true_sentiment
+eval_01,"Nordic construction conglomerate defaults on $750m private debt facility",Credit Event,negative
+eval_02,"Credit rating agency downgrades three regional banks to junk status",Credit Event,negative
+eval_03,"Major automotive supplier misses scheduled coupon payment on senior notes",Credit Event,negative
+eval_04,"Chinese real estate developer formally enters offshore debt restructuring",Credit Event,negative
+eval_05,"Distressed retailer files for Chapter 11 bankruptcy after holiday sales slump",Credit Event,negative
+eval_06,"Leveraged loan defaults hit post-crisis high as interest coverage shrinks",Credit Event,negative
+eval_07,"Offshore bondholders reject standstill request from defaulting infrastructure group",Credit Event,negative
+eval_08,"Private credit fund marks down portfolio assets by 12% following borrower default",Credit Event,negative
+eval_09,"Commercial real estate developer reaches comprehensive debt refinancing agreement",Credit Event,positive
+eval_10,"Federal Reserve holds policy rate steady but signals potential hike if inflation lingers",Macroeconomic,neutral
+eval_11,"US headline CPI surges 4.2% year-over-year exceeding analyst expectations",Macroeconomic,negative
+eval_12,"European Central Bank cuts benchmark interest rate by 25 basis points to support growth",Macroeconomic,positive
+eval_13,"German manufacturing PMI falls to 41.2 pointing to deepening industrial recession",Macroeconomic,negative
+eval_14,"Bank of England warns high wage growth threatens timely return to inflation target",Macroeconomic,negative
+eval_15,"US economy adds 275000 jobs in blowout labor market report easing recession fears",Macroeconomic,positive
+eval_16,"Yield curve inverts further as bond traders price in prolonged central bank tightening",Macroeconomic,negative
+eval_17,"IMF raises global GDP growth forecast for 2027 citing resilient trade flows",Macroeconomic,positive
+eval_18,"US imposes 25% retaliatory tariffs on Chinese green tech and electric vehicle imports",Geopolitical,negative
+eval_19,"Brent crude surges past $95 following military escalation in the Strait of Hormuz",Geopolitical,negative
+eval_20,"Western allies announce expanded financial sanctions targeting state-owned energy firms",Geopolitical,negative
+eval_21,"Middle East diplomatic talks resume in Geneva offering hopes for maritime truce",Geopolitical,positive
+eval_22,"Black Sea grain shipping corridor suspended following drone attack on port terminal",Geopolitical,negative
+eval_23,"Bilateral trade pact signed between UK and India cutting import duties on autos and tech",Geopolitical,positive
+eval_24,"NATO members agree to boost defense spending to 2.5% of GDP across Eastern Europe",Geopolitical,neutral
+eval_25,"US and European Union announce framework agreement on critical mineral export controls",Geopolitical,neutral
+eval_26,"OPEC+ ministers agree on surprise 1.2 million barrel oil output cut",Commodity/Supply Chain,negative
+eval_27,"Natural gas futures collapse 18% as European storage reaches 98% capacity ahead of winter",Commodity/Supply Chain,positive
+eval_28,"Drought in Panama Canal forces 30% reduction in daily cargo vessel transits",Commodity/Supply Chain,negative
+eval_29,"Global semiconductor foundries face acute shortage of ultra-pure silicon substrates",Commodity/Supply Chain,negative
+eval_30,"Lithium hydroxide prices rebound 15% as electric vehicle battery demand surges",Commodity/Supply Chain,positive
+eval_31,"Copper futures hit two-year high on Chilean mine disruptions and grid expansion demand",Commodity/Supply Chain,positive
+eval_32,"Agricultural grain prices spike after early frost damages Midwestern wheat belt",Commodity/Supply Chain,negative
+eval_33,"Automaker halts assembly lines across three European plants due to wiring harness delays",Commodity/Supply Chain,negative
+eval_34,"SEC fines Wall Street investment bank $200m for unmonitored messaging app usage",Regulatory/Legal,negative
+eval_35,"Federal Reserve and FDIC approve revised Basel III capital surcharge guidelines for megabanks",Regulatory/Legal,negative
+eval_36,"European Union antitrust regulators launch formal probe into big tech cloud licensing",Regulatory/Legal,negative
+eval_37,"Federal court dismisses antitrust lawsuit against major healthcare conglomerate",Regulatory/Legal,positive
+eval_38,"State attorney general revokes operating license of predatory buy-now-pay-later fintech",Regulatory/Legal,negative
+eval_39,"CFTC announces strict new margin rules for uncleared bilateral swap counterparties",Regulatory/Legal,negative
+eval_40,"Consumer Financial Protection Bureau caps credit card late payment fees at $8",Regulatory/Legal,negative
+eval_41,"Supreme Court upholds patent protection for blockbuster oncology therapeutic",Regulatory/Legal,positive
+eval_42,"JPMorgan Chase agrees to acquire regional lender First Republic in FDIC-brokered auction",Merger/Acquisition,positive
+eval_43,"Antitrust watchdog blocks $69bn mega-merger between video game publishers",Merger/Acquisition,negative
+eval_44,"Chevron announces $53bn all-stock transaction to acquire Hess Corporation",Merger/Acquisition,positive
+eval_45,"Private equity consortium launches $15bn takeover bid for European software leader",Merger/Acquisition,positive
+eval_46,"ExxonMobil successfully completes acquisition of Pioneer Natural Resources",Merger/Acquisition,positive
+eval_47,"Telecom giant explores spinoff of wireless tower infrastructure into separate REIT",Merger/Acquisition,neutral
+eval_48,"Ransomware attack forces major clearing house to process wholesale trades manually",Operational/Cyber,negative
+eval_49,"CrowdStrike software update defect triggers global airline and banking IT outage",Operational/Cyber,negative
+eval_50,"Rogue AI agents infiltrate financial institution order management systems",Operational/Cyber,negative
+eval_51,"Core payment gateway suffers four-hour downtime during peak Black Friday transaction window",Operational/Cyber,negative
+eval_52,"Regional bank restores online banking platforms following distributed denial of service attack",Operational/Cyber,positive
+eval_53,"Tesla recalls 2 million vehicles across North America to update driver assistance software",Corporate/Product,negative
+eval_54,"Nvidia unveils next-generation Blackwell AI chip platform with 4x training performance",Corporate/Product,positive
+eval_55,"Boeing 737 Max delivery forecast lowered following fuselage assembly inspections",Corporate/Product,negative
+eval_56,"Pfizer reports strong phase 3 trial results for next-gen obesity medication",Corporate/Product,positive
+eval_57,"Apple reports record quarterly services revenue offsetting modest iPhone shipment decline",Corporate/Product,positive
+eval_58,"Financial Times weekend review discusses the evolution of private debt markets",Other,neutral
+eval_59,"Wall Street historians reflect on lessons learned from the 1987 Black Monday market crash",Other,neutral
+eval_60,"Op-ed: How remote work continues to reshape commercial real estate valuation",Other,neutral
