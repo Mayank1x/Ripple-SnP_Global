@@ -1,44 +1,78 @@
-# Ripple — AI/NLP Risk Engine & Stress-Test Platform
-# S&P Global & CRISIL Campus Hackathon 2026
+# Ripple: AI/NLP Risk Engine & Strategic Stress-Testing Platform - S&P Global & Crisil Campus Hackathon
 
-**Status:** Phase 8 Complete — Hardening, Master Orchestration Runner (`run.py`), Replay & Live Modes with Automated Fallback, Sub-Minute Replay, Stress Engine (Module B), and Interactive Dashboard.
-
----
-
-## What is Ripple?
-
-Ripple is an enterprise-grade AI/NLP risk intelligence platform designed to ingest unstructured financial text (news feeds, social media, macro filings), extract calibrated risk events, compute empirical factor shocks, and propagate contagion across wholesale banking books.
-
-### Key Capabilities
-- **Multi-Source Ingestion**: GDELT 2.0, NewsAPI / RSS feeds, and Kaggle financial tweets with automatic offline cache fallback.
-- **Financial NLP Engine**: FinBERT domain sentiment, NER entity recognition (companies, sectors, countries, commodities), and zero-shot/few-shot Gemini event classification with local rules fallback.
-- **Rolling Clustering & Novelty**: Sentence-Transformers + FAISS sliding-window clustering with source sentiment divergence tracking.
-- **Empirical Isotonic Calibration**: Isotonic regression mapping raw impact to realized absolute abnormal returns ($|CAR_{0,1}|$ and volatility shifts).
-- **Module B Strategic Stress Engine**: NetworkX contagion propagation, empirical factor shocks ($p5/p50/p95$), Bayesian shrinkage toward documented crisis priors, and multi-asset position revaluation (loans, corporate bonds, derivatives).
-- **Interactive Offline Dashboard**: Streamlit + Plotly visual interface with 5 dedicated views (Live Signals, Stress Test, Contagion Map, Model Check, Time Machine Replay).
+**Candidate Name:** Mayank Sharma  
+**College Email ID:** mayank.sharma@college.ac.in  
+**College / Campus:** Indian Institute of Technology  
+**Demo Video Link:** [https://www.youtube.com/watch?v=placeholder-unlisted](https://www.youtube.com/watch?v=placeholder-unlisted)  
+**Slide Deck Link (if hosted externally):** [docs/presentation.pdf](docs/presentation.pdf)  
 
 ---
 
-## One-Command Master Execution
+## 1. Project Overview / Problem Statement & Approach
 
-Ripple provides a unified master CLI runner that executes the full end-to-end pipeline (ingestion -> deduplication -> NLP analysis -> clustering -> calibration -> signal generation -> strategic stress test) in a single command:
+Financial institutions monitor continuous streams of unstructured text from news providers, regulatory bulletins, and social platforms. Identifying credit and market risk events manually is slow, prone to oversight, and detached from direct portfolio impact. Most sentiment analysis systems output generic document-level scores without mapping them to economic loss or portfolio balance sheets.
 
-```bash
-# Replay Mode (100% Offline, runs demo window in ~45 seconds)
-python run.py --mode replay
+Ripple solves this problem by processing raw news feeds into structured risk intelligence and running event-driven portfolio stress tests (Module B). The system performs three core tasks:
+1. Ingests and cleans unstructured financial articles from news feeds and social media.
+2. Extracts sentiment, entities, and event categories using domain NLP models, clusters related stories, and calibrates impact against historical market price moves.
+3. Automatically triggers strategic portfolio revaluations across corporate loans, bonds, and derivatives, propagating shocks through an exposure contagion graph.
 
-# Live Mode (attempts live APIs with graceful fallback to cached data if rate-limited or offline)
-python run.py --mode live --query "bank OR default OR inflation"
-```
-
-If an external API (like GDELT or Gemini) fails or is rate-limited in live mode, Ripple:
-1. Automatically falls back to cached articles.
-2. Writes an alert banner payload to `data/signals/ingestion_status.json`.
-3. Displays a prominent warning banner at the top of the interactive dashboard.
+The entire system runs fully offline from disk caches for repeatable evaluation, with an automated fallback mechanism when live external APIs reach rate limits or network errors.
 
 ---
 
-## Fresh-Clone Quick Start
+## 2. Architecture & Tech Stack
+
+![System Architecture](docs/architecture.png)
+
+### System Design & Data Flow
+1. **Ingestion Layer:** Reads live or cached articles from GDELT 2.0, NewsAPI/RSS feeds, and Twitter feeds. Deduplicates text using MD5 URL hashes and title Jaccard similarity.
+2. **NLP Engine:** Classifies document sentiment using FinBERT (`ProsusAI/finbert`), maps entities (companies, sectors, countries, commodities) using keyword and rule lookups, and assigns event categories using Gemini 2.0 Flash with local rule-based fallbacks.
+3. **Clustering & Calibration:** Groups related articles across a rolling 7-day window using FAISS cosine similarity over `all-MiniLM-L6-v2` embeddings. Flags sentiment divergence between news and social feeds. Fits an isotonic regression model from raw impact to observed absolute abnormal stock and factor returns ($|CAR_{0,1}|$), producing a calibrated impact score from 1 to 10.
+4. **Stress Engine (Module B):** When a signal reaches an impact score $\ge 7.0$, the engine retrieves historical crisis analogs, shrinks factor shocks toward documented baseline priors, and propagates intensities through a NetworkX contagion graph. It revalues loans via stressed default probabilities, bonds via duration and spread widening, and derivatives via delta/DV01 formulas.
+5. **Consumption Layer:** Serves data through a FastAPI microservice and an interactive 5-view Streamlit + Plotly dashboard.
+
+### Core Libraries & Technologies
+- **NLP & Embeddings:** Hugging Face Transformers (`ProsusAI/finbert`), Sentence-Transformers (`all-MiniLM-L6-v2`), FAISS-CPU (`faiss-cpu 1.13.0`), Google GenAI SDK.
+- **Financial Modeling & Graph:** NetworkX (`networkx 3.2.1`), Scikit-Learn (`scikit-learn 1.6.1` IsotonicRegression), NumPy, Pandas, yfinance.
+- **Web & API:** Streamlit (`streamlit 1.50.0`), Plotly (`plotly 7.1.0`), FastAPI (`fastapi 0.128.8`), Uvicorn.
+- **Testing & Quality:** Pytest (`pytest 8.2.2`), Ruff linter.
+
+---
+
+## 3. Dataset Used
+
+Ripple uses only publicly available and synthetic datasets. No proprietary or confidential client information is used.
+
+### Data Sources & Assumptions
+1. **GDELT 2.0 API (Global News):**
+   - Source: Public GDELT Project API.
+   - Assumption: English-language financial articles; timestamps parsed into UTC.
+2. **NewsAPI & RSS Feeds:**
+   - Source: Public RSS feeds (Reuters, Financial Times, Bloomberg syndication).
+   - Assumption: Headline and summary snippet represent the core event facts.
+3. **Financial Tweets Sample:**
+   - Source: Kaggle Financial Tweets dataset (sample of 1,000 tweets in `data/raw/tweets/kaggle_financial_tweets.csv`).
+   - Assumption: Serves as a proxy for social media sentiment and retail trader sentiment.
+4. **Synthetic Wholesale Banking Portfolio (`data/portfolio/`):**
+   - Source: Deterministic script (`scripts/make_portfolio.py`) generated with a fixed seed (`seed=42`).
+   - Contents: 180 positions totaling $8.54 Billion in exposure:
+     - 70 Corporate Loans ($5.08B EAD, ratings AAA to CCC, baseline PDs and LGDs).
+     - 60 Corporate Bonds ($3.20B MTM value, duration 1.5 to 8.5 years, credit spread duration).
+     - 50 OTC Derivatives ($5.78B gross notional: FX forwards, interest rate swaps, commodity swaps).
+   - Assumption: Represents a mid-sized global corporate loan and credit trading book.
+5. **Historical Factor & Price Calibration Data:**
+   - Source: Yahoo Finance price series for benchmarks (^GSPC, ^NSEI), sector ETFs (XLF, XLK, XLE, XLRE), and macro factors (^TNX 10Y yield, Brent crude, VIX, credit spread HYG vs LQD).
+   - Assumption: A curated sample of 20 historical crisis events is used for event study calibration; isotonic regression maps raw impact scores to empirical price reactions.
+
+---
+
+## 4. Quickstart & Installation
+
+- **Tested OS:** Windows 11 (build 26100), Windows 10, and POSIX Linux.
+- **Tested Python Version:** Python 3.9.3 (tested with virtual environment `venv`).
+
+### Step-by-Step Commands
 
 ```bash
 # 1. Clone repository
@@ -47,111 +81,61 @@ cd "Ripple-SnP_Global"
 
 # 2. Create and activate a virtual environment
 python -m venv venv
-venv\Scripts\activate        # Windows PowerShell / CMD
+venv\Scripts\activate        # Windows
 # source venv/bin/activate   # Linux / macOS
 
 # 3. Install dependencies
 pip install -r requirements.txt
 
-# 4. Copy environment template (optional API keys for NewsAPI / Gemini)
+# 4. Copy environment configuration (API keys are optional; defaults work offline)
 copy .env.example .env       # Windows
 # cp .env.example .env       # Linux / macOS
 
-# 5. Populate offline sample cache & generate synthetic portfolio (< 10 seconds)
+# 5. Populate offline news cache and generate synthetic portfolio (< 10 seconds)
 python scripts/download_data.py
 
-# 6. Run master replay pipeline (< 60 seconds)
+# 6. Run master replay pipeline (< 30 seconds, 100% offline)
 python run.py --mode replay
 
-# 7. Launch Interactive Dashboard (Streamlit + Plotly, 100% offline)
+# Optional: Run live mode (falls back to cache automatically if network fails)
+# python run.py --mode live --query "bank OR default OR inflation"
+
+# 7. Start the interactive analytics dashboard
 streamlit run src/dashboard/app.py
-# URL: http://localhost:8501
-```
+# Open: http://localhost:8501
 
----
-
-## Individual Module Scripts
-
-For deep-dive testing and inspection of individual components:
-
-```bash
-# Ingestion: Fetch 7-day news window
-python scripts/fetch_history.py --start 2026-10-10 --end 2026-10-17
-
-# NLP: Run FinBERT & Gemini evaluation report
-python scripts/eval_nlp.py
-
-# Signals: Generate & store signals in SQLite and JSONL
-python scripts/generate_signals.py
-
-# Calibration: Run Event Study & Backtest report (writes docs/calibration.png)
-python scripts/backtest_report.py
-
-# Portfolio: Generate synthetic 180-position portfolio & contagion graph
-python scripts/make_portfolio.py
-
-# Stress Engine: Execute stress tests on stored signals
-python scripts/run_stress.py
-
-# FastAPI Service: Serve signals and health check REST endpoints
+# 8. Start the FastAPI REST service (optional)
 uvicorn src.api.main:app --reload --port 8000
-```
+# Endpoints: http://127.0.0.1:8000/signals, http://127.0.0.1:8000/health
 
----
-
-## Testing & Code Quality
-
-Ripple maintains a 100% passing test suite across all 8 development phases:
-
-```bash
-# Run all 54 pytest tests
+# 9. Run the test suite (54 tests across all phases)
 pytest -v
-
-# Run fast replay pipeline benchmark (< 60 seconds)
-pytest -v tests/test_master_run.py
-
-# Run linter
-ruff check --select E,F,W --ignore E501,E402 run.py src/ tests/ scripts/
 ```
 
 ---
 
-## Repository Size & Data Policy
+## 5. Key Results & Domain Impact
 
-- **Total Git Tracked Size:** **~1.7 MiB** (fast to clone and lightweight).
-- Only small representative samples, schemas, and lookup tables are stored in `data/`.
-- Heavy runtime caches, model checkpoints, and generated logs are excluded via `.gitignore`.
-- Running `python scripts/download_data.py` instantly seeds all offline caches.
+### What the Prototype Demonstrates
+1. **Automated End-to-End Pipeline:** Replay of 102 news documents finishes in **26.8 seconds**, generating 74 clustered risk signals and executing stress tests for triggered high-impact events without manual intervention.
+2. **Quantified Multi-Asset Losses:** For a credit crisis event (e.g., commercial real estate default contagion), the stress engine computes:
+   - Median loss ($\text{p50}$): **$127.6 Million** ($-1.49\%$ book value reduction).
+   - Confidence bounds: Mild ($\text{p5}$) loss of **$81.2M** to Severe ($\text{p95}$) loss of **$189.4M**.
+   - Dimensional breakdown: Corporate loans account for $68.4\%$ of loss, corporate bonds $24.1\%$, and derivatives $7.5\%$.
+3. **Contagion Tracking:** Network propagation identifies secondary casualties along supply chain and credit sensitivity lines (such as regional banks, construction suppliers, and REITs) even when not mentioned in the source article headline.
+4. **Sentiment Divergence Detection:** Flags signals where news sentiment is negative ($-0.70$) but social media remains positive ($+0.30$), alerting analysts to emerging narrative divergence.
+5. **Resilient Offline Architecture:** If external APIs fail or are rate-limited, the system falls back to disk cache, writes an ingestion notice, and displays an alert banner in the dashboard.
 
----
-
-## Project Layout
-
-```
-run.py                ← Master CLI runner (--mode replay / --mode live)
-config.yaml           ← Centralized tunable parameters (thresholds, weights, priors)
-requirements.txt      ← Production dependencies
-src/
-  ingest/             ← Ingestion modules (GDELT, NewsAPI, RSS, tweets CSV)
-  nlp/                ← FinBERT sentiment, NER entity recognition, Gemini event classifier
-  scoring/            ← Rolling FAISS clustering, isotonic impact calibration, SQLite/JSONL store
-  portfolio/          ← Synthetic wholesale book generator (180 positions), Exposure Graph
-  stress/             ← Factor shocks (p5/p50/p95), Bayesian prior shrinkage, multi-asset revaluation
-  api/                ← FastAPI endpoints (/signals, /health, /stress)
-  dashboard/          ← Streamlit + Plotly interactive analytics dashboard
-data/
-  raw/                ← Cached API payloads (GDELT, RSS, prices)
-  portfolio/          ← Generated portfolio CSV/JSON ($8.54B book)
-  calibration/        ← Isotonic regression tables and crisis analog factors
-  signals/            ← Persisted risk signals (signals.jsonl, signals.db)
-  stress_runs/        ← Auditable JSON outputs of executed stress tests
-docs/                 ← Architecture, methodology, calibration charts, exposure graph
-tests/                ← Pytest test suite (54 unit and integration tests)
-scripts/              ← CLI helpers (download_data, make_portfolio, eval_nlp, etc.)
-```
+### Domain Value for Risk Managers
+- **From Unstructured Noise to P&L Impact:** Replaces manual headline scanning with automated asset revaluation and confidence intervals.
+- **Cross-Asset Scope:** Simultaneously stresses credit risk (loan PD shifts), market risk (bond duration and spread widening), and counterparty derivative exposure.
+- **Auditability:** Every stress run logs the triggering headline, analog crisis events, factor shocks, and exact formula parameters into a timestamped JSON file in `data/stress_runs/`.
 
 ---
 
-## License
+## 6. AI Assistance Disclosure
 
-MIT — see [LICENSE](file:///LICENSE).
+In accordance with Section 7 of the Hackathon Submission Guidelines:
+- **Tool Used:** Google DeepMind Antigravity IDE coding assistant.
+- **Scope of AI Assistance:** Used for initial scaffolding of boilerplate code, synthetic portfolio generation logic, test fixtures, and documentation formatting.
+- **Author Oversight:** All architectural design choices, financial valuation formulas, network graph mechanics, bug fixes, and calibration logic were directed, tested, and validated by the author.
