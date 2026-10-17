@@ -1,0 +1,345 @@
+{
+  "run_id": "stress_df4bc47670",
+  "timestamp": "2026-10-17T09:44:23.785466+00:00",
+  "triggered": true,
+  "trigger_reason": "Impact score 7.7 >= threshold 7.0. Stress test executed.",
+  "signal_summary": {
+    "event_id": "evt_b9952aae2cea",
+    "title": "Blacklisted, sued, sold to collectors? The real cost of not paying your credit card",
+    "event_type": "Credit Event",
+    "impact_score": 7.7,
+    "sentiment_score": -0.6456,
+    "confidence": 0.92
+  },
+  "shocks": {
+    "horizon_days": 5,
+    "factors": {
+      "yield_10y": {
+        "p5": -0.002883,
+        "p50": -0.002033,
+        "p95": -0.001183
+      },
+      "credit_spread": {
+        "p5": 0.00395,
+        "p50": 0.005267,
+        "p95": 0.006583
+      },
+      "brent_oil": {
+        "p5": -0.026167,
+        "p50": -0.019,
+        "p95": -0.011833
+      },
+      "fx_dxy": {
+        "p5": 0.006667,
+        "p50": 0.009,
+        "p95": 0.011333
+      },
+      "equity_us": {
+        "p5": -0.033833,
+        "p50": -0.026333,
+        "p95": -0.018833
+      }
+    },
+    "analogs": [
+      {
+        "event_id": "hist_001",
+        "title": "Silicon Valley Bank faces deposit flight after announcing $1.8B loss on bond sales",
+        "event_type": "Credit Event",
+        "similarity": 0.2022,
+        "timestamp": "2024-03-08T14:30:00Z",
+        "moves_1d": {
+          "yield_10y": -0.0018,
+          "credit_spread": 0.0035,
+          "brent_oil": -0.012,
+          "fx_dxy": 0.006,
+          "equity_us": -0.014
+        },
+        "moves_5d": {
+          "yield_10y": -0.0032,
+          "credit_spread": 0.0065,
+          "brent_oil": -0.028,
+          "fx_dxy": 0.011,
+          "equity_us": -0.032
+        }
+      },
+      {
+        "event_id": "hist_013",
+        "title": "Commercial real estate default rates climb to highest level in a decade",
+        "event_type": "Credit Event",
+        "similarity": 0.1892,
+        "timestamp": "2025-04-10T12:00:00Z",
+        "moves_1d": {
+          "yield_10y": -0.0006,
+          "credit_spread": 0.0024,
+          "brent_oil": -0.006,
+          "fx_dxy": 0.004,
+          "equity_us": -0.012
+        },
+        "moves_5d": {
+          "yield_10y": -0.0014,
+          "credit_spread": 0.0048,
+          "brent_oil": -0.014,
+          "fx_dxy": 0.008,
+          "equity_us": -0.022
+        }
+      }
+    ],
+    "shrunk_to_prior": true,
+    "shrinkage_weight": 0.33,
+    "message": "Fewer than N=3 analogs found (k=2); shrunk toward config prior table with weight 0.33."
+  },
+  "portfolio_value_before": 8538147288.1,
+  "portfolio_value_after_p50": 8419512136.17,
+  "loss_p50": 127572856.31,
+  "loss_pct_p50": 0.0149,
+  "band": {
+    "p5_loss": 114195012.78,
+    "p5_post_value": 8439913669.69,
+    "p5_loss_pct": 0.01,
+    "p95_loss": 141662718.84,
+    "p95_post_value": 8401300193.92,
+    "p95_loss_pct": 0.02
+  },
+  "loss_by_asset_class": {
+    "Derivative": 68976430.11,
+    "Bond": 49435680.18,
+    "Loan": 9160746.02
+  },
+  "loss_by_sector": {
+    "Financials": 33206436.52,
+    "Industrials": 28318670.56,
+    "Energy": 19481340.47,
+    "Technology": 18650587.95,
+    "Materials": 12629395.95,
+    "Consumer Discretionary": 7613369.6,
+    "Real Estate": 2932952.06,
+    "Telecommunications": 2801797.04,
+    "Healthcare": 1435195.86,
+    "Consumer Staples": 473358.78,
+    "Utilities": 21013.33,
+    "Automotive": 8738.19
+  },
+  "loss_by_country": {
+    "United States": 64886134.0,
+    "United Kingdom": 13854079.01,
+    "Switzerland": 7977395.21,
+    "Germany": 7724281.72,
+    "Singapore": 6157664.87,
+    "India": 5802644.75,
+    "Norway": 5500114.95,
+    "France": 4369314.44,
+    "Australia": 4234380.88,
+    "Spain": 3201552.39,
+    "Japan": 1816233.63,
+    "Taiwan": 1259404.88,
+    "Brazil": 582660.73,
+    "Italy": 198256.66,
+    "Sweden": 8738.19
+  },
+  "top_10_positions": [
+    {
+      "position_id": "deriv_012",
+      "counterparty": "Caterpillar Inc.",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Industrials",
+      "country": "United States",
+      "rating": "BBB",
+      "pre_value": 2276271.42,
+      "post_value": 0.0,
+      "loss": 3427902.65,
+      "loss_pct": 1.505929,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 180415928.85
+      }
+    },
+    {
+      "position_id": "deriv_029",
+      "counterparty": "Rhine Industrial Chemicals",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Materials",
+      "country": "Germany",
+      "rating": "AA",
+      "pre_value": 1133670.5,
+      "post_value": 0.0,
+      "loss": 3282910.5,
+      "loss_pct": 2.895824,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 172784762.97
+      }
+    },
+    {
+      "position_id": "bond_046",
+      "counterparty": "Banco Santander",
+      "asset_class": "Bond",
+      "instrument_type": "Green Sustainability Bond",
+      "sector": "Financials",
+      "country": "Spain",
+      "rating": "AA",
+      "pre_value": 89475374.85,
+      "post_value": 86273822.46,
+      "loss": 3201552.39,
+      "loss_pct": 0.035781,
+      "details": {
+        "dy_bps": -20.33,
+        "dspread_bps": 71.92,
+        "mod_duration": 7.34,
+        "spread_duration": 7.05,
+        "dP_pct": -3.5781
+      }
+    },
+    {
+      "position_id": "deriv_004",
+      "counterparty": "Caterpillar Inc.",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Industrials",
+      "country": "United States",
+      "rating": "BBB",
+      "pre_value": 1340026.42,
+      "post_value": 0.0,
+      "loss": 3178401.16,
+      "loss_pct": 2.371894,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 167284271.7
+      }
+    },
+    {
+      "position_id": "deriv_037",
+      "counterparty": "Chevron",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Energy",
+      "country": "United States",
+      "rating": "BBB",
+      "pre_value": 7036749.09,
+      "post_value": 3869111.16,
+      "loss": 3167637.93,
+      "loss_pct": 0.450156,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 166717785.6
+      }
+    },
+    {
+      "position_id": "deriv_044",
+      "counterparty": "Singapore Port Terminals",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Industrials",
+      "country": "Singapore",
+      "rating": "AA",
+      "pre_value": 4169769.73,
+      "post_value": 1465503.4,
+      "loss": 2704266.33,
+      "loss_pct": 0.648541,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 142329807.01
+      }
+    },
+    {
+      "position_id": "deriv_034",
+      "counterparty": "Nordic Marine Logistics",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Industrials",
+      "country": "Norway",
+      "rating": "BB",
+      "pre_value": 2980851.97,
+      "post_value": 420354.09,
+      "loss": 2560497.88,
+      "loss_pct": 0.858982,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 134763046.21
+      }
+    },
+    {
+      "position_id": "deriv_016",
+      "counterparty": "Chevron",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Energy",
+      "country": "United States",
+      "rating": "B",
+      "pre_value": 1032923.71,
+      "post_value": 0.0,
+      "loss": 2471363.55,
+      "loss_pct": 2.392591,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 130071765.96
+      }
+    },
+    {
+      "position_id": "deriv_033",
+      "counterparty": "Sydney Lithium Resources",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Materials",
+      "country": "Australia",
+      "rating": "BBB",
+      "pre_value": 5589361.79,
+      "post_value": 3239941.31,
+      "loss": 2349420.48,
+      "loss_pct": 0.420338,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 123653709.58
+      }
+    },
+    {
+      "position_id": "deriv_011",
+      "counterparty": "Singapore Port Terminals",
+      "asset_class": "Derivative",
+      "instrument_type": "Commodity Swap",
+      "sector": "Industrials",
+      "country": "Singapore",
+      "rating": "A",
+      "pre_value": 2603986.52,
+      "post_value": 448029.2,
+      "loss": 2155957.32,
+      "loss_pct": 0.827945,
+      "details": {
+        "type": "Commodity Swap",
+        "dPrice": -0.019,
+        "notional": 113471438.03
+      }
+    }
+  ],
+  "graph_shock_nodes": {
+    "Financials": 0.77,
+    "Morgan Stanley": 0.385,
+    "Citigroup": 0.385,
+    "Goldman Sachs": 0.385,
+    "Deutsche Bank": 0.385,
+    "BNP Paribas": 0.385,
+    "Wells Fargo": 0.385,
+    "Silicon Valley Bank": 0.385,
+    "JPMorgan Chase & Co.": 0.385,
+    "UBS Group": 0.385,
+    "Banco Santander": 0.385,
+    "HSBC Holdings": 0.385,
+    "Barclays": 0.385,
+    "United States": 0.1636,
+    "Germany": 0.1636,
+    "France": 0.1636,
+    "Switzerland": 0.1636,
+    "Spain": 0.1636,
+    "United Kingdom": 0.1636
+  },
+  "saved_filepath": null
+}

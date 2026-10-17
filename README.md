@@ -46,11 +46,15 @@ python scripts/make_portfolio.py
 python scripts/run_stress.py
 # Outputs: data/stress_runs/ (before/after valuations, confidence bands, loss breakdowns)
 
-# 10. Start the FastAPI Service
+# 10. Launch Interactive Dashboard (Phase 7 - Streamlit + Plotly, 100% Offline)
+streamlit run src/dashboard/app.py
+# Interactive Views: Live Signals, Stress Test, Contagion Map, Model Check, Time Machine
+
+# 11. Start the FastAPI Service
 uvicorn src.api.main:app --reload --port 8000
 # Endpoints: http://127.0.0.1:8000/signals, http://127.0.0.1:8000/health
 
-# 11. Run full test suite (52 tests across all 6 phases)
+# 12. Run full test suite (53 tests across all 7 phases)
 pytest -v
 ```
 

@@ -1,1 +1,1 @@
-# Placeholder — dashboard (Phase 6).
+"""Ripple Dashboard Package (Streamlit + Plotly)."""
