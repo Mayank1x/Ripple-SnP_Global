@@ -1,0 +1,16 @@
+ticker,name,sector,base_weight
+AAPL,Apple Inc.,Technology,0.066667
+MSFT,Microsoft Corporation,Technology,0.066667
+GOOGL,Alphabet Inc.,Technology,0.066667
+AMZN,Amazon.com Inc.,Consumer Discretionary,0.066667
+NVDA,Nvidia Corporation,Technology,0.066667
+META,Meta Platforms Inc.,Communication Services,0.066667
+JPM,JPMorgan Chase & Co.,Financials,0.066667
+BAC,Bank of America,Financials,0.066667
+GS,Goldman Sachs,Financials,0.066667
+XOM,ExxonMobil,Energy,0.066667
+CVX,Chevron,Energy,0.066667
+JNJ,Johnson & Johnson,Healthcare,0.066667
+WMT,Walmart Inc.,Consumer Staples,0.066667
+BA,The Boeing Company,Industrials,0.066667
+CAT,Caterpillar Inc.,Industrials,0.066667

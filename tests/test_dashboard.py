@@ -40,3 +40,8 @@ def test_dashboard_all_five_pages_offline():
     # Page 5: Time Machine Replay
     at.sidebar.radio[1].set_value("5. Time Machine Replay").run()
     assert len(at.exception) == 0, f"Page 5 Exception: {at.exception}"
+
+    # Page 6: Tactical Rebalancer (Module A)
+    at.sidebar.radio[1].set_value("6. Tactical Rebalancer (Module A)").run()
+    assert len(at.exception) == 0, f"Page 6 Exception: {at.exception}"
+

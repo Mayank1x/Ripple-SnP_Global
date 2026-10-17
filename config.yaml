@@ -153,5 +153,15 @@ stress:
       fx_dxy: 0.002
       equity_us: -0.005
 
+rebalance:
+  constituents_file: "data/index/constituents.csv"
+  history_file: "data/rebalance/history.jsonl"
+  half_life_days: 2.0          # Exponential decay half-life for fading old signals
+  tilt_strength: 0.50          # Multiplier for tilt magnitude
+  min_weight: 0.02             # 2% minimum weight floor
+  max_weight: 0.15             # 15% maximum weight cap
+  turnover_cap: 0.03           # 3% maximum weight change per stock per rebalance
+  transaction_cost_bps: 10.0   # 10 bps transaction cost per unit of one-way turnover
+
 
 
