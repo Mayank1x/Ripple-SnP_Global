@@ -19,8 +19,9 @@ faiss-cpu>=1.8.0
 numpy>=1.26.0
 pandas>=2.2.0
 
-# --- Finance data (Phase 4) ---
-# yfinance==0.2.38
+# --- Finance data & Calibration (Phase 4) ---
+yfinance>=1.0.0
+matplotlib>=3.8.0
 
 # --- API / dashboard (Phase 3 & 6) ---
 fastapi>=0.111.0

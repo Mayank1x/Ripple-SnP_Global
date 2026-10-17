@@ -164,9 +164,14 @@ def score_events(events: list[Event]) -> list[tuple[Event, float]]:
         ]
 
         novelty = compute_novelty(event_emb, recent_priors)
-        _, impact_score, _ = calculate_impact(event, novelty=novelty)
+        raw_impact, uncalibrated_score, _ = calculate_impact(event, novelty=novelty)
 
-        results.append((event, impact_score))
+        # Apply empirical isotonic calibration if available
+        from src.scoring.calibration import get_calibrator
+
+        calibrated_score, cal_meta = get_calibrator().predict_score(raw_impact)
+
+        results.append((event, calibrated_score, raw_impact, cal_meta))
         history.append((event_dt, event_emb))
 
     return results

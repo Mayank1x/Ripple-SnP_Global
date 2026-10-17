@@ -1,13 +1,14 @@
 # Ripple — AI/NLP Risk Engine & Stress-Test Platform
 # S&P Global & CRISIL Campus Hackathon 2026
 
-**Status:** Phase 3 complete — Events clustering, Impact scoring, Risk Signals, and FastAPI server.
+**Status:** Phase 4 complete — Event Study, Market Model, Factor Series, and Isotonic Calibration.
 
 ## What is Ripple?
 
 Ripple ingests financial news from multiple sources, runs NLP to detect risk
 events (sentiment, classification, impact), clusters them into real-world events,
-generates actionable risk signals, and exposes them via FastAPI for downstream stress testing.
+calibrates impact scores against empirical market moves (|CAR| and volatility shifts),
+and generates actionable risk signals served via FastAPI.
 
 ## Quick start
 
@@ -32,11 +33,15 @@ python scripts/eval_nlp.py
 # 6. Generate Risk Signals & Populate SQLite / JSONL (Phase 3)
 python scripts/generate_signals.py
 
-# 7. Start the FastAPI Service (Phase 3)
+# 7. Run Event Study Calibration & Backtest Report (Phase 4)
+python scripts/backtest_report.py
+# Writes docs/calibration.png and re-scores signals with calibrated impact
+
+# 8. Start the FastAPI Service (Phase 3)
 uvicorn src.api.main:app --reload --port 8000
 # Endpoints: http://127.0.0.1:8000/signals, http://127.0.0.1:8000/health
 
-# 8. Run full test suite (29 tests)
+# 9. Run full test suite (35 tests)
 pytest -v
 ```
 

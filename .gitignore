@@ -44,6 +44,10 @@ data/cache/**/*.json
 data/signals/*.jsonl
 data/signals/*.db
 !data/signals/.gitkeep
+data/raw/prices/*.csv
+data/raw/prices/*.json
+!data/raw/prices/.gitkeep
+
 
 # Model cache
 models/

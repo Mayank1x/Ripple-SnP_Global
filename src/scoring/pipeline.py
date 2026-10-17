@@ -46,20 +46,28 @@ def process_signals(
     # 2. Score events with novelty and impact
     scored_pairs = score_events(events)
 
-    # 3. Create Signals
+    # 3. Create Signals with calibrated impact scores
     signals: list[Signal] = []
-    for event, impact_score in scored_pairs:
+    for item in scored_pairs:
+        event = item[0]
+        calibrated_score = float(item[1])
+        raw_impact = float(item[2]) if len(item) > 2 else 0.0
+        cal_meta = item[3] if len(item) > 3 and isinstance(item[3], dict) else {}
+
         sig = Signal(
             event_id=event.event_id,
             timestamp=event.first_seen,
             entities=event.entities,
             sentiment_score=event.sentiment_score,
             event_type=event.event_type,
-            impact_score=impact_score,
+            impact_score=calibrated_score,
             confidence=event.confidence,
             divergence_flag=event.divergence_flag,
             evidence=event.evidence,
             model_versions=DEFAULT_MODEL_VERSIONS,
+            raw_impact=raw_impact,
+            calibrated_impact=float(cal_meta.get("predicted_abnormal_move", 0.0)),
+            calibration_metadata=cal_meta,
         )
         signals.append(sig)
 
