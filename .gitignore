@@ -1,0 +1,44 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environment
+venv/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Tests & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Data (keep structure, ignore large cached files)
+data/raw/**/*.json
+data/raw/**/*.jsonl
+data/raw/**/*.xml
+data/raw/tweets/*.csv
+!data/raw/tweets/kaggle_financial_tweets.csv
+!data/raw/tweets/.gitkeep
+!data/raw/gdelt/.gitkeep
+!data/raw/rss/.gitkeep
+data/audit/*
+!data/audit/.gitkeep
+
+# Model cache
+models/

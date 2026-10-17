@@ -1,0 +1,45 @@
+# Ripple configuration.
+# Secrets belong in .env, not here.
+
+ingest:
+  # Default query for financial-risk news
+  default_query: "bank OR default OR inflation"
+
+  gdelt:
+    enabled: true
+    base_url: "https://api.gdeltproject.org/api/v2/doc/doc"
+    max_records: 250
+    source_lang: "english"
+    # format is always json, mode is always artlist
+
+  newsapi:
+    enabled: true
+    # Uses NEWSAPI_KEY from .env. Falls back to RSS if key is missing.
+    base_url: "https://newsapi.org/v2/everything"
+    page_size: 100
+    language: "en"
+    sort_by: "relevancy"
+
+  rss:
+    # Fallback feeds used when no NewsAPI key is set
+    feeds:
+      - name: "Reuters Business"
+        url: "https://www.reutersagency.com/feed/?taxonomy=best-sectors&post_type=best"
+      - name: "CNBC Top News"
+        url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114"
+      - name: "Financial Times"
+        url: "https://www.ft.com/?format=rss"
+      - name: "MarketWatch"
+        url: "https://feeds.marketwatch.com/marketwatch/topstories/"
+
+  tweets:
+    # Place a Kaggle CSV in this directory. The loader reads all .csv files.
+    directory: "data/raw/tweets"
+
+  cache_dir: "data/raw"
+
+  dedup:
+    # Drop articles with identical URL or identical title
+    enabled: true
+    # Only keep articles whose language field equals this (case-insensitive)
+    keep_language: "english"
