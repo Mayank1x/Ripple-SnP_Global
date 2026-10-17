@@ -37,11 +37,16 @@ python scripts/generate_signals.py
 python scripts/backtest_report.py
 # Writes docs/calibration.png and re-scores signals with calibrated impact
 
-# 8. Start the FastAPI Service (Phase 3)
+# 8. Run Phase 5: Generate Synthetic Portfolio & Exposure Graph
+python scripts/make_portfolio.py
+# Outputs: data/portfolio/ (180 positions: 70 loans, 60 bonds, 50 derivatives)
+# Graph:   docs/exposure_graph.png
+
+# 9. Start the FastAPI Service
 uvicorn src.api.main:app --reload --port 8000
 # Endpoints: http://127.0.0.1:8000/signals, http://127.0.0.1:8000/health
 
-# 9. Run full test suite (35 tests)
+# 10. Run full test suite (46 tests across all 5 phases)
 pytest -v
 ```
 
