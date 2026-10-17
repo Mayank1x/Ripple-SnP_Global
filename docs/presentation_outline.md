@@ -11,8 +11,9 @@ This document provides the slide-by-slide structure, talking points, and screens
 - **Header:** Ripple: AI/NLP Risk Engine & Strategic Stress-Testing Platform
 - **Subheader:** Automated Financial Event Extraction and Contagion Revaluation for Wholesale Banking
 - **Candidate Details:**
-  - Name: Mayank Sharma
-  - College: Indian Institute of Technology
+  - Name: Mayank Rathore
+  - College: Vellore Institute of Technology Bhopal
+  - Email: mayank.23bai10291@vitbhopal.ac.in
   - Track: Module B (Strategic Portfolio Stress Testing)
   - Date: October 2026
 - **Visual / Graphic:**

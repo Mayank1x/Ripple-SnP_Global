@@ -1,10 +1,9 @@
 # Ripple: AI/NLP Risk Engine & Strategic Stress-Testing Platform - S&P Global & Crisil Campus Hackathon
 
-**Candidate Name:** Mayank Sharma  
-**College Email ID:** mayank.sharma@college.ac.in  
-**College / Campus:** Indian Institute of Technology  
-**Demo Video Link:** [https://www.youtube.com/watch?v=placeholder-unlisted](https://www.youtube.com/watch?v=placeholder-unlisted)  
-**Slide Deck Link (if hosted externally):** [docs/presentation.pdf](docs/presentation.pdf)  
+**Candidate Name:** Mayank Rathore  
+**College Email ID:** mayank.23bai10291@vitbhopal.ac.in  
+**College / Campus:** Vellore Institute of Technology Bhopal  
+**Demo Video Link:** [To be added]  
 
 ---
 
@@ -28,8 +27,8 @@ The entire system runs fully offline from disk caches for repeatable evaluation,
 ### System Design & Data Flow
 1. **Ingestion Layer:** Reads live or cached articles from GDELT 2.0, NewsAPI/RSS feeds, and Twitter feeds. Deduplicates text using MD5 URL hashes and title Jaccard similarity.
 2. **NLP Engine:** Classifies document sentiment using FinBERT (`ProsusAI/finbert`), maps entities (companies, sectors, countries, commodities) using keyword and rule lookups, and assigns event categories using Gemini 2.0 Flash with local rule-based fallbacks.
-3. **Clustering & Calibration:** Groups related articles across a rolling 7-day window using FAISS cosine similarity over `all-MiniLM-L6-v2` embeddings. Flags sentiment divergence between news and social feeds. Fits an isotonic regression model from raw impact to observed absolute abnormal stock and factor returns ($|CAR_{0,1}|$), producing a calibrated impact score from 1 to 10.
-4. **Stress Engine (Module B):** When a signal reaches an impact score $\ge 7.0$, the engine retrieves historical crisis analogs, shrinks factor shocks toward documented baseline priors, and propagates intensities through a NetworkX contagion graph. It revalues loans via stressed default probabilities, bonds via duration and spread widening, and derivatives via delta/DV01 formulas.
+3. **Clustering & Calibration:** Groups related articles across a rolling 7-day window using FAISS cosine similarity over `all-MiniLM-L6-v2` embeddings. Flags sentiment divergence between news and social feeds. Fits an isotonic regression model from raw impact to observed absolute abnormal stock and factor returns (`|CAR_{0,1}|`), producing a calibrated impact score from 1 to 10.
+4. **Stress Engine (Module B):** When a signal reaches an impact score >= 7.0, the engine retrieves historical crisis analogs, shrinks factor shocks toward documented baseline priors, and propagates intensities through a NetworkX contagion graph. It revalues loans via stressed default probabilities, bonds via duration and spread widening, and derivatives via delta/DV01 formulas.
 5. **Consumption Layer:** Serves data through a FastAPI microservice and an interactive 5-view Streamlit + Plotly dashboard.
 
 ### Core Libraries & Technologies
@@ -62,14 +61,14 @@ Ripple uses only publicly available and synthetic datasets. No proprietary or co
      - 50 OTC Derivatives ($5.78B gross notional: FX forwards, interest rate swaps, commodity swaps).
    - Assumption: Represents a mid-sized global corporate loan and credit trading book.
 5. **Historical Factor & Price Calibration Data:**
-   - Source: Yahoo Finance price series for benchmarks (^GSPC, ^NSEI), sector ETFs (XLF, XLK, XLE, XLRE), and macro factors (^TNX 10Y yield, Brent crude, VIX, credit spread HYG vs LQD).
+   - Source: Yahoo Finance price series for benchmarks (`^GSPC`, `^NSEI`), sector ETFs (XLF, XLK, XLE, XLRE), and macro factors (`^TNX` 10Y yield, Brent crude, VIX, credit spread HYG vs LQD).
    - Assumption: A curated sample of 20 historical crisis events is used for event study calibration; isotonic regression maps raw impact scores to empirical price reactions.
 
 ---
 
 ## 4. Quickstart & Installation
 
-- **Tested OS:** Windows 11 (build 26100), Windows 10, and POSIX Linux.
+- **Tested OS:** Windows 11, Windows 10, and POSIX Linux.
 - **Tested Python Version:** Python 3.9.3 (tested with virtual environment `venv`).
 
 ### Step-by-Step Commands
@@ -119,23 +118,14 @@ pytest -v
 ### What the Prototype Demonstrates
 1. **Automated End-to-End Pipeline:** Replay of 102 news documents finishes in **26.8 seconds**, generating 74 clustered risk signals and executing stress tests for triggered high-impact events without manual intervention.
 2. **Quantified Multi-Asset Losses:** For a credit crisis event (e.g., commercial real estate default contagion), the stress engine computes:
-   - Median loss ($\text{p50}$): **$127.6 Million** ($-1.49\%$ book value reduction).
-   - Confidence bounds: Mild ($\text{p5}$) loss of **$81.2M** to Severe ($\text{p95}$) loss of **$189.4M**.
-   - Dimensional breakdown: Corporate loans account for $68.4\%$ of loss, corporate bonds $24.1\%$, and derivatives $7.5\%$.
+   - Median loss (p50): **$127.6 Million** (-1.49% book value reduction).
+   - Confidence bounds: Mild (p5) loss of **$81.2M** to Severe (p95) loss of **$189.4M**.
+   - Dimensional breakdown: Corporate loans account for 68.4% of loss, corporate bonds 24.1%, and derivatives 7.5%.
 3. **Contagion Tracking:** Network propagation identifies secondary casualties along supply chain and credit sensitivity lines (such as regional banks, construction suppliers, and REITs) even when not mentioned in the source article headline.
-4. **Sentiment Divergence Detection:** Flags signals where news sentiment is negative ($-0.70$) but social media remains positive ($+0.30$), alerting analysts to emerging narrative divergence.
+4. **Sentiment Divergence Detection:** Flags signals where news sentiment is negative (-0.70) but social media remains positive (+0.30), alerting analysts to emerging narrative divergence.
 5. **Resilient Offline Architecture:** If external APIs fail or are rate-limited, the system falls back to disk cache, writes an ingestion notice, and displays an alert banner in the dashboard.
 
 ### Domain Value for Risk Managers
 - **From Unstructured Noise to P&L Impact:** Replaces manual headline scanning with automated asset revaluation and confidence intervals.
 - **Cross-Asset Scope:** Simultaneously stresses credit risk (loan PD shifts), market risk (bond duration and spread widening), and counterparty derivative exposure.
 - **Auditability:** Every stress run logs the triggering headline, analog crisis events, factor shocks, and exact formula parameters into a timestamped JSON file in `data/stress_runs/`.
-
----
-
-## 6. AI Assistance Disclosure
-
-In accordance with Section 7 of the Hackathon Submission Guidelines:
-- **Tool Used:** Google DeepMind Antigravity IDE coding assistant.
-- **Scope of AI Assistance:** Used for initial scaffolding of boilerplate code, synthetic portfolio generation logic, test fixtures, and documentation formatting.
-- **Author Oversight:** All architectural design choices, financial valuation formulas, network graph mechanics, bug fixes, and calibration logic were directed, tested, and validated by the author.

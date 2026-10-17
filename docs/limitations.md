@@ -42,7 +42,9 @@ This document provides a technical and quantitative assessment of the limitation
    - This formula omits the second-order convexity term ($+\frac{1}{2} \text{Convexity} \cdot dy^2$).
    - For yield movements under 100 basis points, the error is negligible ($< 0.15\%$). However, during severe interest rate shocks ($> 250\text{ bps}$), it overestimates bond price declines.
 2. **Merton-Type Loan PD Approximation:**
-   - The exponential default intensity formula ($PD_{\text{stressed}} = \min(1.0, PD \cdot \exp(k \cdot \text{Intensity}))$) is a simplified hazard rate model.
+   - The exponential default intensity formula:
+     $$PD_{\text{stressed}} = \min\left(1.0, \; PD \cdot \exp(k \cdot \text{Intensity})\right)$$
+     is a simplified hazard rate model.
    - It does not account for collateral liquidation recovery lags, secondary guarantor guarantees, or loan covenant waivers.
 3. **Linear Derivative Approximations:**
    - OTC derivatives are limited to linear delta/DV01 sensitivities (FX forwards, interest rate swaps, commodity swaps).

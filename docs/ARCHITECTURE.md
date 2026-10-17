@@ -34,10 +34,10 @@ For the 7-slide pitch deck guide, see [presentation_outline.md](presentation_out
    - Persists all risk signals to SQLite (`data/signals/signals.db`) and JSONL (`data/signals/signals.jsonl`).
 
 4. **Strategic Stress Engine - Module B (`src/stress/`):**
-   - Triggers when an incoming signal reaches $\text{impact\_score} \ge 7.0$.
-   - Finds historical crisis analogs in FAISS; applies Bayesian shrinkage toward documented baseline priors when analogs $< 3$.
+   - Triggers when an incoming signal reaches `impact_score` >= 7.0.
+   - Finds historical crisis analogs in FAISS; applies Bayesian shrinkage toward documented baseline priors when analogs < 3.
    - Propagates shocks through the NetworkX exposure graph with distance decay ($\delta = 0.5$, max 2 hops).
-   - Revalues the banking book ($8.54B book: 70 loans, 60 corporate bonds, 50 OTC derivatives) across median ($\text{p50}$), mild ($\text{p5}$), and severe ($\text{p95}$) factor moves.
+   - Revalues the banking book ($8.54B book: 70 loans, 60 corporate bonds, 50 OTC derivatives) across median (p50), mild (p5), and severe (p95) factor moves.
    - Logs every stress execution to `data/stress_runs/run_*.json`.
 
 5. **Delivery & Interface Layer (`src/dashboard/`, `src/api/`):**

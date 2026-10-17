@@ -73,9 +73,9 @@ Classification runs via Gemini 2.0 Flash with a local keyword/rule heuristic fal
 Articles are converted into 384-dimensional dense vectors using `all-MiniLM-L6-v2`:
 $$\mathbf{e}_i = \text{Embedding}(\text{title}_i), \quad \|\mathbf{e}_i\|_2 = 1.0$$
 
-Clusters represent real-world events. An incoming document $\mathbf{e}_{\text{new}}$ at time $t$ joins an existing cluster $C_k$ if:
+Clusters represent real-world events. An incoming document $\mathbf{e}_{\text{new}}$ at time $t$ joins an existing cluster $C_k$ with centroid $\mathbf{c}_k$ if:
 1. Time distance is within the rolling window: $|t - t_{\text{latest}, k}| \le 7\text{ days}$.
-2. Cosine similarity with the cluster centroid $\mathbf{c}_k$ meets the threshold:
+2. Cosine similarity with the cluster centroid meets the threshold:
    $$\text{sim}(\mathbf{e}_{\text{new}}, \mathbf{c}_k) = \mathbf{e}_{\text{new}} \cdot \mathbf{c}_k \ge 0.75$$
 
 When a document joins, the cluster centroid is updated:
@@ -99,7 +99,7 @@ $$\mathbf{1}_{\text{divergence}} = \begin{cases} 1 & \text{if } |\bar{s}_{\text{
 ## 5. Event Study & Empirical Calibration
 
 ### 5.1 Market Model Estimation
-For events with a linked company or sector ETF, abnormal returns are estimated against a benchmark index ($R_{m,t} = \text{\^GSPC}$ for US, $\text{\^NSEI}$ for India) over an estimation window of $T = [-120, -21]$ trading days:
+For events with a linked company or sector ETF, abnormal returns are estimated against a benchmark index ($R_{m,t} =$ `^GSPC` for US, `^NSEI` for India) over an estimation window of $T = [-120, -21]$ trading days:
 $$R_{i,t} = \alpha_i + \beta_i R_{m,t} + \epsilon_{i,t}$$
 
 Parameters $\hat{\alpha}_i$ and $\hat{\beta}_i$ are estimated via Ordinary Least Squares (OLS).
@@ -158,11 +158,11 @@ Where:
 ## 7. Multi-Asset Revaluation Formulas (Module B)
 
 ### 7.1 Historical Analog Retrieval & Bayesian Shrinkage
-For a triggered event ($\text{impact\_score} \ge 7.0$), the system retrieves $k$ historical crisis analogs from a FAISS index of past events.
+For a triggered event (`impact_score` >= 7.0), the system retrieves $k$ historical crisis analogs from a FAISS index of past events.
 If fewer than $N = 3$ analogs are matched, factor shocks are shrunk toward a documented prior table:
 $$\text{Shock}_{\text{shrunk}} = \lambda \cdot \text{Shock}_{\text{analog}} + (1 - \lambda) \cdot \text{Shock}_{\text{prior}}, \quad \lambda = \frac{\min(k, N)}{N}$$
 
-Shocks are computed at the 5th percentile ($\text{p5}$), median ($\text{p50}$), and 95th percentile ($\text{p95}$).
+Shocks are computed at the 5th percentile (p5), median (p50), and 95th percentile (p95).
 
 ### 7.2 Corporate Loans Book
 Credit risk on corporate loans uses the Merton/Vasicek structural credit framework:
@@ -213,12 +213,12 @@ Derivatives are priced based on linear risk sensitivities:
 | Parameter | Default Value | Description |
 |:---|:---:|:---|
 | Clustering Threshold | $0.75$ | Minimum FAISS cosine similarity to join cluster |
-| Clustering Window | $7\text{ days}$ | Maximum lookback for rolling temporal cluster |
+| Clustering Window | 7 days | Maximum lookback for rolling temporal cluster |
 | Sentiment Divergence Threshold | $0.40$ | Absolute difference between news and social sentiment |
 | Stress Trigger Threshold | $7.0$ | Minimum calibrated impact score to execute Module B |
 | Analog Sample Size ($N$) | $3$ | Minimum analogs before Bayesian shrinkage applies |
 | Network Contagion Decay ($\delta$) | $0.50$ | Attenuation per hop in exposure graph |
 | Contagion Max Hops | $2$ | Maximum propagation depth in network |
 | Loan Sensitivity ($k_{\text{loan}}$) | $2.0$ | Multiplier for default intensity acceleration |
-| Estimation Window | $120\text{ days}$ | Pre-event window for market model OLS calibration |
-| Event Study Window | $[0, +3]$ | Forward days evaluated for cumulative abnormal return |
+| Estimation Window | 120 days | Pre-event window for market model OLS calibration |
+| Event Study Window | [0, +3] | Forward days evaluated for cumulative abnormal return |
