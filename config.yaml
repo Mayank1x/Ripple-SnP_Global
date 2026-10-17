@@ -53,3 +53,41 @@ nlp:
     provider: "zero_shot"  # options: "zero_shot", "gemini"
     zero_shot_model: "facebook/bart-large-mnli"
 
+scoring:
+  cluster:
+    model_name: "all-MiniLM-L6-v2"
+    similarity_threshold: 0.72  # Cosine similarity threshold for clustering within rolling window
+    rolling_window_hours: 48    # 48h rolling window
+  aggregation:
+    source_weights:
+      newsapi: 1.0
+      gdelt: 1.0
+      rss: 1.0
+      tweets: 0.6
+      benchmark: 1.0
+      synthetic: 1.0
+    divergence:
+      threshold: 0.40  # Sentiment diff between news and social to flag divergence
+      min_news_docs: 1
+      min_social_docs: 1
+  impact:
+    weights:
+      event_prior: 0.35
+      sentiment_confidence: 0.30
+      source_breadth: 0.15
+      novelty: 0.20
+    event_priors:
+      Credit Event: 0.95
+      Geopolitical: 0.85
+      Macroeconomic: 0.80
+      Regulatory/Legal: 0.75
+      Operational/Cyber: 0.70
+      Commodity/Supply Chain: 0.65
+      Merger/Acquisition: 0.60
+      Corporate/Product: 0.50
+      Other: 0.30
+  storage:
+    signals_jsonl: "data/signals/signals.jsonl"
+    signals_db: "data/signals/signals.db"
+
+

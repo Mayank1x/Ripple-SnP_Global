@@ -41,6 +41,9 @@ data/audit/*
 !data/audit/.gitkeep
 data/cache/**/*.json
 !data/cache/**/.gitkeep
+data/signals/*.jsonl
+data/signals/*.db
+!data/signals/.gitkeep
 
 # Model cache
 models/

@@ -10,18 +10,22 @@ torch>=2.3.0
 scikit-learn>=1.5.0
 protobuf>=4.25.0
 
+# --- Scoring & Embeddings (Phase 3) ---
+sentence-transformers>=3.0.0
+faiss-cpu>=1.8.0
+
 # --- Graph / numerics ---
 # networkx==3.3
 numpy>=1.26.0
 pandas>=2.2.0
 
-# --- Finance data (Phase 3) ---
+# --- Finance data (Phase 4) ---
 # yfinance==0.2.38
 
-# --- API / dashboard (Phase 6) ---
-# fastapi==0.111.0
-# uvicorn==0.30.1
-# httpx==0.27.0
+# --- API / dashboard (Phase 3 & 6) ---
+fastapi>=0.111.0
+uvicorn>=0.30.0
+httpx>=0.27.0
 # jinja2==3.1.4
 
 # --- Config / secrets ---

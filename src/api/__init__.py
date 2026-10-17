@@ -1,1 +1,5 @@
-# Placeholder — API endpoints (Phase 6).
+"""Ripple API endpoints."""
+
+from src.api.main import app
+
+__all__ = ["app"]
