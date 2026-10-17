@@ -42,11 +42,15 @@ python scripts/make_portfolio.py
 # Outputs: data/portfolio/ (180 positions: 70 loans, 60 bonds, 50 derivatives)
 # Graph:   docs/exposure_graph.png
 
-# 9. Start the FastAPI Service
+# 9. Run Phase 6: Stress Engine Evaluation (Module B)
+python scripts/run_stress.py
+# Outputs: data/stress_runs/ (before/after valuations, confidence bands, loss breakdowns)
+
+# 10. Start the FastAPI Service
 uvicorn src.api.main:app --reload --port 8000
 # Endpoints: http://127.0.0.1:8000/signals, http://127.0.0.1:8000/health
 
-# 10. Run full test suite (46 tests across all 5 phases)
+# 11. Run full test suite (52 tests across all 6 phases)
 pytest -v
 ```
 

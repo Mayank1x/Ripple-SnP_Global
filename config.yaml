@@ -91,4 +91,67 @@ scoring:
     signals_jsonl: "data/signals/signals.jsonl"
     signals_db: "data/signals/signals.db"
 
+stress:
+  trigger_impact_score: 7.0       # Trigger rule: stress portfolio if impact_score >= 7.0
+  min_analogs: 3                  # N analogs threshold: if fewer, shrink towards prior table
+  default_horizon_days: 5         # 5-day cumulative forward shock horizon
+  output_dir: "data/stress_runs"
+  loan_k_sensitivity: 2.0         # k in stressed PD = min(1.0, PD * exp(k * sector_intensity))
+  prior_shocks:
+    Credit Event:
+      yield_10y: -0.0015          # -15 bps flight-to-safety
+      credit_spread: 0.0045       # +45 bps spread widening
+      brent_oil: -0.015           # -1.5% oil drop
+      fx_dxy: 0.008               # +0.8% USD flight
+      equity_us: -0.025           # -2.5% market drop
+    Macroeconomic:
+      yield_10y: 0.0025           # +25 bps rate hike
+      credit_spread: 0.0020       # +20 bps widening
+      brent_oil: 0.010            # +1.0%
+      fx_dxy: 0.012               # +1.2% USD rise
+      equity_us: -0.018           # -1.8%
+    Geopolitical:
+      yield_10y: -0.0010          # -10 bps flight to safety
+      credit_spread: 0.0035       # +35 bps widening
+      brent_oil: 0.065            # +6.5% oil price spike
+      fx_dxy: 0.015               # +1.5% USD rally
+      equity_us: -0.030           # -3.0%
+    Commodity/Supply Chain:
+      yield_10y: 0.0010           # +10 bps inflation pressure
+      credit_spread: 0.0025       # +25 bps widening
+      brent_oil: 0.080            # +8.0% oil spike
+      fx_dxy: 0.006               # +0.6%
+      equity_us: -0.020           # -2.0%
+    Operational/Cyber:
+      yield_10y: 0.0000
+      credit_spread: 0.0015
+      brent_oil: 0.0000
+      fx_dxy: 0.0000
+      equity_us: -0.015
+    Regulatory/Legal:
+      yield_10y: 0.0000
+      credit_spread: 0.0020
+      brent_oil: 0.0000
+      fx_dxy: 0.0000
+      equity_us: -0.012
+    Corporate/Product:
+      yield_10y: 0.0000
+      credit_spread: 0.0010
+      brent_oil: 0.0000
+      fx_dxy: 0.0000
+      equity_us: -0.008
+    Merger/Acquisition:
+      yield_10y: 0.0000
+      credit_spread: 0.0012
+      brent_oil: 0.0000
+      fx_dxy: 0.0000
+      equity_us: 0.005
+    Other:
+      yield_10y: 0.0005
+      credit_spread: 0.0010
+      brent_oil: 0.0000
+      fx_dxy: 0.002
+      equity_us: -0.005
+
+
 
