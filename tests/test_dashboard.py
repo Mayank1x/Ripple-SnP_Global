@@ -1,12 +1,13 @@
 """Tests for Phase 7 - Interactive Dashboard (Streamlit + Plotly).
 
-Verifies that all 5 pages of the dashboard execute completely offline from local cache
-without any exceptions or missing dependencies:
-1. Live Signals Feed
-2. Portfolio Stress Test
-3. Network Contagion Map
-4. Model Check & Validation
-5. Time Machine Replay
+Verifies that all 6 views of the dashboard execute completely offline from local cache
+without any exceptions or missing dependencies in both Dark and Light modes:
+1. Overview
+2. Signals
+3. Stress test (both Ranked Contagion Cascade and Network Topology Map)
+4. Rebalancer
+5. Model check
+6. Time machine
 """
 
 import os
@@ -33,4 +34,9 @@ def test_dashboard_all_six_pages_offline():
             at.radio[2].set_value(page).run()
             assert len(at.exception) == 0, f"Exception on {page} in {mode} mode: {at.exception}"
 
-
+            # If on Stress test page, also test toggling contagion view
+            if page == "Stress test":
+                contagion_radios = [r for r in at.radio if "Ranked Contagion Cascade" in r.options]
+                if contagion_radios:
+                    contagion_radios[0].set_value("Network Topology Map").run()
+                    assert len(at.exception) == 0, f"Exception switching contagion view in {mode} mode: {at.exception}"

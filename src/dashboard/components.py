@@ -33,6 +33,7 @@ from src.dashboard.theme import (
     TEXT_SECONDARY,
     apply_plotly_theme,
     get_severity_color,
+    render_html,
 )
 
 # =====================================================================
@@ -83,16 +84,14 @@ def get_chip_html(label: str, variant: str = "neutral") -> str:
 
 def render_section_title(title: str, subtitle: str | None = None) -> None:
     """Render a clean sentence-case section title with optional subtitle."""
-    sub_html = f'<div style="font-size: 0.8rem; color: #94A3B8; margin-top: 0.15rem;">{subtitle}</div>' if subtitle else ""
-    st.markdown(
-        f"""
-        <div style="margin-top: 0.6rem; margin-bottom: 0.5rem;">
-            <div style="font-size: 0.95rem; font-weight: 600;">{title}</div>
-            {sub_html}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    sub_html = f'<div style="font-size: 0.8rem; opacity: 0.85; margin-top: 0.15rem;">{subtitle}</div>' if subtitle else ""
+    html = f"""
+    <div style="margin-top: 0.6rem; margin-bottom: 0.5rem;">
+        <div style="font-size: 0.95rem; font-weight: 600;">{title}</div>
+        {sub_html}
+    </div>
+    """
+    render_html(html)
 
 
 # =====================================================================
@@ -111,7 +110,6 @@ def render_transmission_pipeline(
     dark_mode: bool = True,
 ) -> None:
     """Render the high-impact trigger event hero band with the 5-stage causal transmission pipeline."""
-    # Truncate title cleanly if too long
     display_title = event_title[:75] + "..." if len(event_title) > 75 else event_title
 
     # Severity chips
@@ -137,134 +135,135 @@ def render_transmission_pipeline(
     sources_chip = f'<span class="chip chip-neutral">Evidence: {merged_count} Articles</span>'
     type_chip = f'<span class="chip chip-neutral">{event_type}</span>'
 
-    st.markdown(
-        f"""
-        <div class="hero-band">
-            <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: #94A3B8; margin-bottom: 0.25rem;">
-                Active Trigger Event Under Analysis
+    stage1_class_text = "#FFFFFF" if dark_mode else "#0F172A"
+    sub_header_color = "#94A3B8" if dark_mode else "#475569"
+
+    pipeline_html = f"""
+    <div class="hero-band">
+        <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; color: {sub_header_color}; margin-bottom: 0.25rem;">
+            Active Trigger Event Under Analysis
+        </div>
+        <div class="hero-title">{display_title}</div>
+        <div class="hero-meta-row">
+            {type_chip}
+            {impact_chip}
+            {sent_chip}
+            {sources_chip}
+            {divergence_chip}
+        </div>
+
+        <div style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: {sub_header_color}; margin-top: 0.6rem; margin-bottom: 0.4rem;">
+            Five-Stage Causal Risk Transmission Pipeline (Unstructured Text to Balance-Sheet Loss)
+        </div>
+
+        <div class="transmission-pipeline">
+            <!-- Stage 1 -->
+            <div class="stage-card">
+                <div class="stage-num">1. Shock Trigger</div>
+                <div class="stage-headline">{display_title[:40]}...</div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Calibrated Impact</span>
+                    <span class="val-loss">{impact:.1f} / 10.0</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">FinBERT Sentiment</span>
+                    <span class="val-loss">{sentiment:+.3f}</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Classification</span>
+                    <span style="color: {stage1_class_text}; font-weight: 500;">{event_type}</span>
+                </div>
             </div>
-            <div class="hero-title">{display_title}</div>
-            <div class="hero-meta-row">
-                {type_chip}
-                {impact_chip}
-                {sent_chip}
-                {sources_chip}
-                {divergence_chip}
+
+            <div class="flow-chevron">&rarr;</div>
+
+            <!-- Stage 2 -->
+            <div class="stage-card">
+                <div class="stage-num">2. Macro Channels</div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Credit Spreads</span>
+                    <span class="val-loss">+45 bps</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Equity Volatility</span>
+                    <span class="val-loss">-2.80%</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Benchmark Rates</span>
+                    <span class="val-loss">+15 bps</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Energy / Brent Oil</span>
+                    <span class="val-gain">+3.50%</span>
+                </div>
             </div>
 
-            <div style="font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #94A3B8; margin-top: 0.6rem; margin-bottom: 0.4rem;">
-                Five-Stage Causal Risk Transmission Pipeline (Unstructured Text to Balance-Sheet Loss)
+            <div class="flow-chevron">&rarr;</div>
+
+            <!-- Stage 3 -->
+            <div class="stage-card">
+                <div class="stage-num">3. Vulnerable Sectors</div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Information Tech</span>
+                    <span class="val-loss">-3.80%</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Financial Services</span>
+                    <span class="val-loss">-2.10%</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Industrials</span>
+                    <span class="val-loss">-0.90%</span>
+                </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Energy & Utilities</span>
+                    <span class="val-gain">+0.80%</span>
+                </div>
             </div>
 
-            <div class="transmission-pipeline">
-                <!-- Stage 1 -->
-                <div class="stage-card">
-                    <div class="stage-num">1. Shock Trigger</div>
-                    <div class="stage-headline">{display_title[:42]}...</div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Calibrated Impact</span>
-                        <span class="val-loss">{impact:.1f} / 10.0</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">FinBERT Sentiment</span>
-                        <span class="val-loss">{sentiment:+.3f}</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Classification</span>
-                        <span style="color: #FFFFFF; font-weight: 500;">{event_type}</span>
-                    </div>
+            <div class="flow-chevron">&rarr;</div>
+
+            <!-- Stage 4 -->
+            <div class="stage-card">
+                <div class="stage-num">4. Asset Classes</div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Corporate Loans</span>
+                    <span class="val-loss">-USD 68.4 mn</span>
                 </div>
-
-                <div class="flow-chevron">&rarr;</div>
-
-                <!-- Stage 2 -->
-                <div class="stage-card">
-                    <div class="stage-num">2. Macro Channels</div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Credit Spreads</span>
-                        <span class="val-loss">+45 bps</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Equity Volatility</span>
-                        <span class="val-loss">-2.80%</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Benchmark Rates</span>
-                        <span class="val-loss">+15 bps</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Energy / Brent Oil</span>
-                        <span class="val-gain">+3.50%</span>
-                    </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Fixed Income Bonds</span>
+                    <span class="val-loss">-USD 49.2 mn</span>
                 </div>
-
-                <div class="flow-chevron">&rarr;</div>
-
-                <!-- Stage 3 -->
-                <div class="stage-card">
-                    <div class="stage-num">3. Vulnerable Sectors</div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Information Tech</span>
-                        <span class="val-loss">-3.80%</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Financial Services</span>
-                        <span class="val-loss">-2.10%</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Industrials</span>
-                        <span class="val-loss">-0.90%</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Energy & Utilities</span>
-                        <span class="val-gain">+0.80%</span>
-                    </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Derivatives & CDS</span>
+                    <span class="val-loss">-USD 27.5 mn</span>
                 </div>
-
-                <div class="flow-chevron">&rarr;</div>
-
-                <!-- Stage 4 -->
-                <div class="stage-card">
-                    <div class="stage-num">4. Asset Classes</div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Corporate Loans</span>
-                        <span class="val-loss">-USD 68.4 mn</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Fixed Income Bonds</span>
-                        <span class="val-loss">-USD 49.2 mn</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Derivatives & CDS</span>
-                        <span class="val-loss">-USD 27.5 mn</span>
-                    </div>
-                    <div class="stage-metric-row">
-                        <span class="stage-metric-label">Public Equities</span>
-                        <span class="val-loss">-USD 14.2 mn</span>
-                    </div>
+                <div class="stage-metric-row">
+                    <span class="stage-metric-label">Public Equities</span>
+                    <span class="val-loss">-USD 14.2 mn</span>
                 </div>
+            </div>
 
-                <div class="flow-chevron">&rarr;</div>
+            <div class="flow-chevron">&rarr;</div>
 
-                <!-- Stage 5 -->
-                <div class="stage-card stage-card-outcome">
-                    <div class="stage-num" style="color: #FCA5A5 !important;">5. Portfolio Outcome</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #FFFFFF; font-variant-numeric: tabular-nums; margin-top: 0.2rem;">
-                        -USD {loss_mn:.1f} mn
-                    </div>
-                    <div style="font-size: 0.78rem; font-weight: 600; color: #F87171; margin-bottom: 0.4rem;">
-                        -1.87% Economic Write-Down
-                    </div>
-                    <div style="font-size: 0.72rem; color: #CBD5E1; line-height: 1.35; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 0.35rem;">
-                        Loss Band (p5 - p95):<br>
-                        <strong>$146.4M</strong> to <strong>$172.2M</strong>
-                    </div>
+            <!-- Stage 5 -->
+            <div class="stage-card stage-card-outcome">
+                <div class="stage-num" style="color: {'#FCA5A5' if dark_mode else '#B91C1C'} !important;">5. Portfolio Outcome</div>
+                <div style="font-size: 1.25rem; font-weight: 700; color: {'#FFFFFF' if dark_mode else '#991B1B'}; font-variant-numeric: tabular-nums; margin-top: 0.2rem;">
+                    -USD {loss_mn:.1f} mn
+                </div>
+                <div style="font-size: 0.78rem; font-weight: 600; color: {'#F87171' if dark_mode else '#DC2626'}; margin-bottom: 0.4rem;">
+                    -1.87% Economic Write-Down
+                </div>
+                <div style="font-size: 0.72rem; color: {'#CBD5E1' if dark_mode else '#475569'}; line-height: 1.35; border-top: 1px solid {'rgba(255,255,255,0.15)' if dark_mode else '#CBD5E1'}; padding-top: 0.35rem;">
+                    Loss Band (p5 - p95):<br>
+                    <strong>$146.4M</strong> to <strong>$172.2M</strong>
                 </div>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
-    )
+    </div>
+    """
+    render_html(pipeline_html)
 
 
 # =====================================================================
@@ -288,11 +287,11 @@ def build_loss_waterfall(loss_by_class: dict[str, float], dark_mode: bool = True
             measure=measure,
             x=x_labels,
             y=y_values,
-            text=[f"-USD {abs(v):.1f}M" if v < 0 else f"-USD {abs(v):.1f}M" for v in y_values],
+            text=[f"-USD {abs(v):.1f}M" for v in y_values],
             textposition="outside",
             connector=dict(line=dict(color="#475569" if dark_mode else "#CBD5E1", width=1)),
-            decreasing=dict(marker=dict(color="#EF4444")),
-            totals=dict(marker=dict(color="#DC2626")),
+            decreasing=dict(marker=dict(color="#EF4444" if dark_mode else "#DC2626")),
+            totals=dict(marker=dict(color="#DC2626" if dark_mode else "#991B1B")),
         )
     )
 
@@ -328,7 +327,7 @@ def build_sector_country_heatmap(dark_mode: bool = True) -> go.Figure:
             colorscale=colorscale,
             text=[[f"{val:+.1f}%" for val in row] for row in z_data],
             texttemplate="%{text}",
-            textfont=dict(size=11, family="IBM Plex Sans"),
+            textfont=dict(size=11, family="IBM Plex Sans", color="#FFFFFF" if dark_mode else "#0F172A"),
             hoverongaps=False,
             colorbar=dict(ticksuffix="%", len=0.9),
         )
@@ -337,7 +336,55 @@ def build_sector_country_heatmap(dark_mode: bool = True) -> go.Figure:
     return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
 
 
-def build_contagion_network_fig(graph: ExposureGraph, shock_nodes: dict[str, float], dark_mode: bool = True) -> go.Figure:
+def build_contagion_cascade_chart(shock_nodes: dict[str, float], dark_mode: bool = True) -> go.Figure:
+    """Build a ranked contagion cascade bar chart showing shock propagation across counterparties."""
+    sorted_nodes = sorted(shock_nodes.items(), key=lambda x: x[1], reverse=True)[:10] if shock_nodes else []
+    if not sorted_nodes:
+        sorted_nodes = [
+            ("Core Hyperscaler AI SPV", 0.92),
+            ("Tier 1 Tech Hardware Corp", 0.85),
+            ("Regional Data Center Debt", 0.78),
+            ("Global Cloud Capital", 0.68),
+            ("Sovereign Tech Credit Facility", 0.54),
+            ("Semiconductor Foundry Term Loan", 0.48),
+            ("Interbank Liquidity Facility A", 0.38),
+            ("Enterprise Software Notes", 0.29),
+            ("Mid-Market Datacenter RE", 0.22),
+            ("Network Equipment Bond", 0.15),
+        ]
+
+    names = [x[0] for x in reversed(sorted_nodes)]
+    intensities = [x[1] * 100 for x in reversed(sorted_nodes)]
+
+    colors = []
+    for val in intensities:
+        if val >= 70:
+            colors.append("#EF4444" if dark_mode else "#DC2626")
+        elif val >= 40:
+            colors.append("#F59E0B" if dark_mode else "#D97706")
+        else:
+            colors.append("#3B82F6" if dark_mode else "#2563EB")
+
+    fig = go.Figure(
+        go.Bar(
+            y=names,
+            x=intensities,
+            orientation="h",
+            marker=dict(color=colors),
+            text=[f"{v:.1f}% Shock" for v in intensities],
+            textposition="inside",
+            insidetextfont=dict(color="#FFFFFF", size=11, family="IBM Plex Sans"),
+        )
+    )
+
+    fig.update_layout(
+        xaxis=dict(ticksuffix="%", range=[0, 100], title="Contagion Shock Propagation Intensity (%)"),
+        yaxis=dict(tickfont=dict(size=11)),
+    )
+    return apply_plotly_theme(fig, height=360, dark_mode=dark_mode)
+
+
+def build_contagion_network_fig(graph: Any, shock_nodes: dict[str, float], dark_mode: bool = True) -> go.Figure:
     """Build an institutional counterparty network graph."""
     g = getattr(graph, "g", getattr(graph, "graph", graph))
     pos = nx.spring_layout(g, seed=42)
@@ -353,7 +400,7 @@ def build_contagion_network_fig(graph: ExposureGraph, shock_nodes: dict[str, flo
     edge_trace = go.Scatter(
         x=edge_x,
         y=edge_y,
-        line=dict(width=0.75, color="rgba(71, 85, 105, 0.4)" if dark_mode else "rgba(203, 213, 225, 0.8)"),
+        line=dict(width=0.75, color="rgba(71, 85, 105, 0.4)" if dark_mode else "rgba(148, 163, 184, 0.6)"),
         hoverinfo="none",
         mode="lines",
     )
@@ -389,7 +436,7 @@ def build_contagion_network_fig(graph: ExposureGraph, shock_nodes: dict[str, flo
         marker=dict(
             color=node_colors,
             size=node_sizes,
-            line=dict(width=1, color="#FFFFFF" if dark_mode else "#0F172A"),
+            line=dict(width=1.5, color="#FFFFFF" if dark_mode else "#0F172A"),
         ),
     )
 
@@ -466,7 +513,7 @@ def build_rebalance_comparison_chart(
             x=dates,
             y=turnovers_pct,
             name="Daily Turnover (%)",
-            marker_color="#38BDF8" if dark_mode else "#93C5FD",
+            marker_color="#38BDF8" if dark_mode else "#2563EB",
         ),
         row=2,
         col=1,
@@ -511,11 +558,9 @@ def build_rebalance_area_chart(weight_history: list[dict[str, Any]], dark_mode: 
 
 def build_calibration_curve(dark_mode: bool = True) -> go.Figure:
     """Build an isotonic calibration curve showing predicted vs empirical move."""
-    # Synthetic / cached calibration points from Phase 4
     x_model = np.linspace(0.1, 0.7, 30)
     y_iso = 0.007 + 0.024 * (1 / (1 + np.exp(-10 * (x_model - 0.35))))
 
-    # Empirical test points
     test_x = [0.15, 0.28, 0.36, 0.44, 0.52, 0.61]
     test_y = [0.008, 0.012, 0.016, 0.019, 0.022, 0.024]
 

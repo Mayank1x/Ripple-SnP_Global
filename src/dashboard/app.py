@@ -41,6 +41,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from src.dashboard.components import (
     build_calibration_curve,
+    build_contagion_cascade_chart,
     build_contagion_network_fig,
     build_loss_waterfall,
     build_rebalance_area_chart,
@@ -76,6 +77,7 @@ from src.dashboard.theme import (
     apply_plotly_theme,
     get_severity_color,
     inject_theme,
+    render_html,
 )
 from src.portfolio.graph import ExposureGraph, build_exposure_graph
 from src.portfolio.schema import Portfolio
@@ -95,6 +97,9 @@ if "theme_mode" not in st.session_state:
 
 if "ingestion_mode" not in st.session_state:
     st.session_state["ingestion_mode"] = "Offline Replay (Cached)"
+
+if "active_nav" not in st.session_state:
+    st.session_state["active_nav"] = "Overview"
 
 is_dark = st.session_state["theme_mode"] == "Dark"
 inject_theme(dark_mode=is_dark)
@@ -254,18 +259,18 @@ def build_horizontal_range_chart(
             marker=dict(
                 symbol="line-ns",
                 size=30,
-                color=LOSS_CORAL,
-                line=dict(width=3, color=LOSS_CORAL),
+                color=LOSS_CORAL if dark_mode else "#DC2626",
+                line=dict(width=3, color=LOSS_CORAL if dark_mode else "#DC2626"),
             ),
             text=[f"Stressed: USD {post_p50/1e9:.2f} bn"],
             textposition="top center",
-            textfont=dict(size=11, color=LOSS_CORAL, family="IBM Plex Sans"),
+            textfont=dict(size=11, color=LOSS_CORAL if dark_mode else "#DC2626", family="IBM Plex Sans"),
             hoverinfo="text",
             hovertext=f"Post-Stress Expected Value: USD {post_p50/1e9:.2f} bn (Economic Loss: -USD {(pre_val - post_p50)/1e6:.1f} mn)",
         )
     )
 
-    ref_color = "#94A3B8" if dark_mode else "#64748B"
+    ref_color = "#94A3B8" if dark_mode else "#475569"
     fig.add_trace(
         go.Scatter(
             y=["Book Value"],
@@ -318,15 +323,16 @@ def build_horizontal_range_chart(
 col_brand, col_mode, col_theme = st.columns([3.5, 2.0, 1.2], gap="small")
 
 with col_brand:
-    st.markdown(
-        """
+    brand_sub = "#94A3B8" if is_dark else "#475569"
+    brand_muted = "#64748B"
+    render_html(
+        f"""
         <div style="padding-top: 4px;">
             <span style="font-size: 1.05rem; font-weight: 600; color: #2D6BFF; letter-spacing: 0.2px;">Ripple Risk Engine</span>
-            <span style="font-size: 0.85rem; color: #94A3B8; margin-left: 8px;">S&P Global & CRISIL Assessment</span>
-            <div style="font-size: 0.72rem; color: #64748B;">Replay Window: 2026-09-08 to 2026-10-16 | Engine Status: Normal (74 Risk Signals)</div>
+            <span style="font-size: 0.85rem; color: {brand_sub}; margin-left: 8px;">S&P Global & CRISIL Assessment</span>
+            <div style="font-size: 0.72rem; color: {brand_muted};">Replay Window: 2026-09-08 to 2026-10-16 | Engine Status: Normal (74 Risk Signals)</div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 with col_mode:
@@ -382,7 +388,7 @@ if st.session_state["ingestion_mode"] == "Live Stream (API Active)":
         else:
             st.info("Live streaming active. If an external API becomes unreachable, the pipeline automatically falls back to local cache.")
 
-# Main Navigation Tabs
+# Main Navigation Tabs (Bound to session_state with key="active_nav")
 nav_page = st.radio(
     "Navigation Menu",
     [
@@ -393,12 +399,12 @@ nav_page = st.radio(
         "Model check",
         "Time machine",
     ],
-    index=0,
+    key="active_nav",
     horizontal=True,
     label_visibility="collapsed",
 )
 
-st.markdown("<div style='height: 4px;'></div>", unsafe_allow_html=True)
+render_html("<div style='height: 4px;'></div>")
 
 
 # =====================================================================
@@ -462,16 +468,16 @@ if nav_page == "Overview":
     col_left, col_right = st.columns([1, 1], gap="medium")
 
     with col_left:
-        st.markdown(
+        subtitle_color = "#94A3B8" if is_dark else "#475569"
+        render_html(
             f"""
             <div class="white-card">
                 <div class="card-title">
                     <span>Module B: Bank Portfolio Stress Impact</span>
-                    <span style="font-size: 0.75rem; color: {'#94A3B8' if is_dark else '#475569'}; font-weight: normal;">42 Positions | Multi-Asset Book</span>
+                    <span style="font-size: 0.75rem; color: {subtitle_color}; font-weight: normal;">42 Positions | Multi-Asset Book</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         pre_val = float(stress_run.get("portfolio_value_before", 8538147288.10))
@@ -489,24 +495,23 @@ if nav_page == "Overview":
         m_col2.metric("Post-Stress Expected", format_currency(post_p50, decimals=2))
         m_col3.metric("Economic Loss (p50)", f"-{format_currency(loss_p50, decimals=1)}", delta=f"-{loss_pct*100:.2f}%", delta_color="inverse")
 
-        st.markdown(
+        heading_color = "#F8FAFC" if is_dark else "#0F172A"
+        render_html(
             f"""
-            <div style="font-size: 0.8rem; font-weight: 600; color: {'#F8FAFC' if is_dark else '#0F172A'}; margin-top: 0.6rem; margin-bottom: 0.2rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: {heading_color}; margin-top: 0.6rem; margin-bottom: 0.2rem;">
                 Portfolio Value After Stress (5th to 95th Percentile Loss Range)
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         range_fig = build_horizontal_range_chart(pre_val, post_p50, min_p, max_p, dark_mode=is_dark)
         st.plotly_chart(range_fig, use_container_width=True, config={"displayModeBar": False})
 
-        st.markdown(
+        render_html(
             f"""
-            <div style="font-size: 0.8rem; font-weight: 600; color: {'#F8FAFC' if is_dark else '#0F172A'}; margin-top: 0.5rem; margin-bottom: 0.4rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: {heading_color}; margin-top: 0.5rem; margin-bottom: 0.4rem;">
                 Five Largest Counterparty Write-Downs
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         top_positions = stress_run.get("top_10_positions", [])[:5]
@@ -537,16 +542,16 @@ if nav_page == "Overview":
             )
 
     with col_right:
-        st.markdown(
+        subtitle_color = "#94A3B8" if is_dark else "#475569"
+        render_html(
             f"""
             <div class="white-card">
                 <div class="card-title">
                     <span>Module A: Tactical Index Rebalancer Reaction</span>
-                    <span style="font-size: 0.75rem; color: {'#94A3B8' if is_dark else '#475569'}; font-weight: normal;">15 S&P 100 Stocks | 10 bps Cost Friction</span>
+                    <span style="font-size: 0.75rem; color: {subtitle_color}; font-weight: normal;">15 S&P 100 Stocks | 10 bps Cost Friction</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         metrics = rebal_data.get("metrics", {})
@@ -560,13 +565,13 @@ if nav_page == "Overview":
         r_col2.metric("Equal-Weight Benchmark", f"{b_ret:+.2f}%")
         r_col3.metric("Cumulative Turnover", f"{turnover*100:.1f}%", delta="1.3 bps Cost", delta_color="off")
 
-        st.markdown(
+        heading_color = "#F8FAFC" if is_dark else "#0F172A"
+        render_html(
             f"""
-            <div style="font-size: 0.8rem; font-weight: 600; color: {'#F8FAFC' if is_dark else '#0F172A'}; margin-top: 0.6rem; margin-bottom: 0.4rem;">
+            <div style="font-size: 0.8rem; font-weight: 600; color: {heading_color}; margin-top: 0.6rem; margin-bottom: 0.4rem;">
                 Constituent Allocations Shifted by Active News Shock
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
 
         latest_weights = rebal_data.get("latest_weights", {})
@@ -656,7 +661,7 @@ elif nav_page == "Signals":
     with f_col3:
         entity_search = st.text_input("Entity or Keyword Search", placeholder="e.g. Apple, Debt, Inflation")
     with f_col4:
-        st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+        render_html("<div style='height: 24px;'></div>")
         divergent_only = st.checkbox("Divergent Only")
 
     # Filter signals
@@ -682,7 +687,7 @@ elif nav_page == "Signals":
     grid_col, detail_col = st.columns([1.35, 1.0], gap="medium")
 
     with grid_col:
-        st.markdown(f"<div style='font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;'>Showing {len(filtered)} of {len(signals)} Signals</div>", unsafe_allow_html=True)
+        render_html(f"<div style='font-size: 0.82rem; font-weight: 600; margin-bottom: 0.4rem;'>Showing {len(filtered)} of {len(signals)} Signals</div>")
         table_records = []
         for s in filtered:
             headline = s.get("title") or (s.get("evidence", [{}])[0].get("title", "Untitled"))
@@ -719,7 +724,8 @@ elif nav_page == "Signals":
 
         if active_event:
             ev_title = active_event.get("title") or (active_event.get("evidence", [{}])[0].get("title", "Untitled Shock"))
-            st.markdown(
+            ev_sub_color = "#94A3B8" if is_dark else "#475569"
+            render_html(
                 f"""
                 <div class="white-card">
                     <div class="card-title">
@@ -729,16 +735,15 @@ elif nav_page == "Signals":
                     <div style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.5rem; line-height: 1.35;">
                         {ev_title}
                     </div>
-                    <div style="font-size: 0.78rem; color: #94A3B8; margin-bottom: 0.75rem;">
+                    <div style="font-size: 0.78rem; color: {ev_sub_color}; margin-bottom: 0.75rem;">
                         Timestamp: {active_event.get('timestamp')} | Confidence: {float(active_event.get('confidence', 0.8)):.2f}
                     </div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             # Score Breakdown
-            st.markdown(
+            render_html(
                 f"""
                 <div class="white-card">
                     <div style="font-size: 0.82rem; font-weight: 600; margin-bottom: 0.5rem;">Score Calibration Breakdown</div>
@@ -747,22 +752,22 @@ elif nav_page == "Signals":
                     <div class="stage-metric-row"><span class="stage-metric-label">Final Calibrated Impact Score</span><span class="val-loss">{float(active_event.get('impact_score', 0)):.1f} / 10.0</span></div>
                     <div class="stage-metric-row"><span class="stage-metric-label">Cross-Source Divergence Flag</span><span>{'Flagged' if active_event.get('divergence_flag') else 'None'}</span></div>
                 </div>
-                """,
-                unsafe_allow_html=True,
+                """
             )
 
             # Articles Evidence List
             evidence_items = active_event.get("evidence", [])
-            st.markdown(f"<div style='font-size: 0.82rem; font-weight: 600; margin-top: 0.5rem; margin-bottom: 0.4rem;'>Merged Evidence Articles ({len(evidence_items)})</div>", unsafe_allow_html=True)
+            render_html(f"<div style='font-size: 0.82rem; font-weight: 600; margin-top: 0.5rem; margin-bottom: 0.4rem;'>Merged Evidence Articles ({len(evidence_items)})</div>")
+            ev_bg = "rgba(20, 36, 61, 0.4)" if is_dark else "#F8FAFC"
+            ev_sub = "#94A3B8" if is_dark else "#475569"
             for idx, ev in enumerate(evidence_items[:5], 1):
-                st.markdown(
+                render_html(
                     f"""
-                    <div style="font-size: 0.8rem; padding: 0.45rem 0.6rem; background-color: {'rgba(20, 36, 61, 0.4)' if is_dark else '#F8FAFC'}; border-left: 2px solid #2D6BFF; margin-bottom: 0.35rem; border-radius: 2px;">
+                    <div style="font-size: 0.8rem; padding: 0.45rem 0.6rem; background-color: {ev_bg}; border-left: 2px solid #2D6BFF; margin-bottom: 0.35rem; border-radius: 2px;">
                         <strong>{idx}. {ev.get('title', 'Article')}</strong><br>
-                        <span style="font-size: 0.72rem; color: #94A3B8;">Source: {ev.get('source', 'NewsAPI')} | <a href="{ev.get('url', '#')}" target="_blank" style="color: #38BDF8;">Direct Link</a></span>
+                        <span style="font-size: 0.72rem; color: {ev_sub};">Source: {ev.get('source', 'NewsAPI')} | <a href="{ev.get('url', '#')}" target="_blank" style="color: #2D6BFF;">Direct Link</a></span>
                     </div>
-                    """,
-                    unsafe_allow_html=True,
+                    """
                 )
 
 
@@ -788,35 +793,33 @@ elif nav_page == "Stress test":
     kpi3.metric("Expected Loss (p50)", f"-{format_currency(loss_p50, decimals=1)}", delta=f"-{loss_pct*100:.2f}%", delta_color="inverse")
     kpi4.metric("Loss Range (p5 to p95)", f"-{format_currency(p5_loss, decimals=0)} to -{format_currency(p95_loss, decimals=0)}")
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    render_html("<div style='height: 8px;'></div>")
 
     row1_left, row1_right = st.columns([1, 1], gap="medium")
 
     with row1_left:
-        st.markdown(
-            f"""
+        render_html(
+            """
             <div class="white-card">
                 <div class="card-title">
                     <span>Loss Waterfall by Asset Class (USD Millions)</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         loss_by_class = stress_run.get("loss_by_asset_class", {"Loans": 68.4e6, "Bonds": 49.2e6, "Derivatives": 27.5e6, "Equities": 14.2e6})
         wf_fig = build_loss_waterfall(loss_by_class, dark_mode=is_dark)
         st.plotly_chart(wf_fig, use_container_width=True, config={"displayModeBar": False})
 
     with row1_right:
-        st.markdown(
-            f"""
+        render_html(
+            """
             <div class="white-card">
                 <div class="card-title">
                     <span>Sector by Country Sensitivity Heatmap (% Write-Down)</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         hm_fig = build_sector_country_heatmap(dark_mode=is_dark)
         st.plotly_chart(hm_fig, use_container_width=True, config={"displayModeBar": False})
@@ -824,31 +827,41 @@ elif nav_page == "Stress test":
     row2_left, row2_right = st.columns([1.1, 1], gap="medium")
 
     with row2_left:
-        st.markdown(
+        contagion_view = st.radio(
+            "Contagion View Format",
+            ["Ranked Contagion Cascade", "Network Topology Map"],
+            index=0,
+            horizontal=True,
+            label_visibility="collapsed",
+        )
+        render_html(
             f"""
             <div class="white-card">
                 <div class="card-title">
-                    <span>Counterparty Exposure & Contagion Network Topology</span>
+                    <span>{contagion_view}</span>
+                    <span style="font-size: 0.72rem; color: {'#94A3B8' if is_dark else '#475569'}; font-weight: normal;">Shock Influx Propagation</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
-        graph = get_cached_exposure_graph()
         shock_nodes = stress_run.get("graph_shock_nodes", {})
-        net_fig = build_contagion_network_fig(graph, shock_nodes, dark_mode=is_dark)
-        st.plotly_chart(net_fig, use_container_width=True, config={"displayModeBar": False})
+        if contagion_view == "Ranked Contagion Cascade":
+            casc_fig = build_contagion_cascade_chart(shock_nodes, dark_mode=is_dark)
+            st.plotly_chart(casc_fig, use_container_width=True, config={"displayModeBar": False})
+        else:
+            graph = get_cached_exposure_graph()
+            net_fig = build_contagion_network_fig(graph, shock_nodes, dark_mode=is_dark)
+            st.plotly_chart(net_fig, use_container_width=True, config={"displayModeBar": False})
 
     with row2_right:
-        st.markdown(
-            f"""
+        render_html(
+            """
             <div class="white-card">
                 <div class="card-title">
                     <span>Historical Crisis Analog Calibration (Quantile Matches)</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         analogs = [
             {"Crisis Analog": "SVB Silicon Valley Tremor", "Date": "2023-03", "Factor Match": "Rates + Credit", "Quantile": "p90", "Calibrated Shock": "-2.15%"},
@@ -879,7 +892,7 @@ elif nav_page == "Rebalancer":
     r_col4.metric("Sharpe Ratio", f"{metrics.get('tilted_sharpe', -0.92):.2f}", delta=f"{metrics.get('tilted_sharpe', -0.92) - metrics.get('benchmark_sharpe', -1.03):+.2f}")
     r_col5.metric("Max Drawdown", f"{metrics.get('tilted_max_drawdown', -2.45):.2f}%", delta="0.00%")
 
-    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    render_html("<div style='height: 8px;'></div>")
 
     # 1. Backtest Comparison Chart
     dates = rebal_data.get("dates", [])
@@ -887,15 +900,14 @@ elif nav_page == "Rebalancer":
     cum_bench = rebal_data.get("cum_bench", [])
     turnovers = rebal_data.get("turnover", [])
 
-    st.markdown(
-        f"""
+    render_html(
+        """
         <div class="white-card">
             <div class="card-title">
                 <span>Cumulative Performance (Net of 10 bps Trading Costs) vs Equal-Weight Benchmark</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
     comp_fig = build_rebalance_comparison_chart(dates, cum_tilted, cum_bench, turnovers, dark_mode=is_dark)
     st.plotly_chart(comp_fig, use_container_width=True, config={"displayModeBar": False})
@@ -907,30 +919,28 @@ elif nav_page == "Rebalancer":
     )
 
     # 2. Stacked Area Chart
-    st.markdown(
-        f"""
+    render_html(
+        """
         <div class="white-card">
             <div class="card-title">
                 <span>15-Stock Constituent Allocation Over Time (Stacked Area)</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
     weight_hist = rebal_data.get("weight_history", [])
     area_fig = build_rebalance_area_chart(weight_hist, dark_mode=is_dark)
     st.plotly_chart(area_fig, use_container_width=True, config={"displayModeBar": False})
 
     # 3. Latest Constituent Attribution Table
-    st.markdown(
-        f"""
+    render_html(
+        """
         <div class="white-card">
             <div class="card-title">
                 <span>Current Constituent Weights & Triggering News Attribution</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     latest_w = rebal_data.get("latest_weights", {})
@@ -975,29 +985,27 @@ elif nav_page == "Model check":
     cal_col, metrics_col = st.columns([1.1, 1], gap="medium")
 
     with cal_col:
-        st.markdown(
-            f"""
+        render_html(
+            """
             <div class="white-card">
                 <div class="card-title">
                     <span>Isotonic Calibration Curve (Predicted Move vs Empirical Shock)</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         cal_fig = build_calibration_curve(dark_mode=is_dark)
         st.plotly_chart(cal_fig, use_container_width=True, config={"displayModeBar": False})
 
     with metrics_col:
-        st.markdown(
-            f"""
+        render_html(
+            """
             <div class="white-card">
                 <div class="card-title">
                     <span>Quantitative Evaluation Metrics (Time-Split Validation)</span>
                 </div>
             </div>
-            """,
-            unsafe_allow_html=True,
+            """
         )
         eval_metrics = [
             {"Metric Name": "Sample Size (Events)", "Training Set (Sept 2026)": "14 events", "Out-of-Sample Test (Oct 2026)": "6 events"},
@@ -1007,15 +1015,16 @@ elif nav_page == "Model check":
             {"Metric Name": "Directional Accuracy", "Training Set (Sept 2026)": "78.6%", "Out-of-Sample Test (Oct 2026)": "71.4%"},
         ]
         st.dataframe(pd.DataFrame(eval_metrics), use_container_width=True, hide_index=True)
-        st.caption("Calibration model fits isotonic regression $f(x)$ on raw combined NLP features to predict the absolute 1-day asset move. Lower threshold = 0.70%, upper threshold = 2.38%.")
+        st.caption("Calibration model fits isotonic regression f(x) on raw combined NLP features to predict the absolute 1-day asset move. Lower threshold = 0.70%, upper threshold = 2.38%.")
 
-    st.markdown(
+    limitations_text_color = "#CBD5E1" if is_dark else "#334155"
+    render_html(
         f"""
         <div class="white-card">
             <div class="card-title">
                 <span>Plain-Language Model Limitations & Governance Disclosure</span>
             </div>
-            <div style="font-size: 0.82rem; line-height: 1.6; color: {'#CBD5E1' if is_dark else '#334155'};">
+            <div style="font-size: 0.82rem; line-height: 1.6; color: {limitations_text_color};">
                 1. <strong>Synthetic Bank Portfolio</strong>: The 42-position $8.54B wholesale banking portfolio is synthetically constructed for hackathon benchmarking.<br>
                 2. <strong>Calibration Sample Size</strong>: Calibration uses 20 historical shock events from September-October 2026; production institutional deployment requires >= 500 events.<br>
                 3. <strong>Linear Duration & Delta Approximation</strong>: Fixed income duration (-D* x dY) omits positive bond convexity under large rate jumps.<br>
@@ -1023,8 +1032,7 @@ elif nav_page == "Model check":
                 5. <strong>Backtest Evaluation Window</strong>: The 29-day evaluation window is illustrative and does not span a full multi-year economic cycle.
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
 
@@ -1073,15 +1081,14 @@ elif nav_page == "Time machine":
     st.plotly_chart(tm_fig, use_container_width=True, config={"displayModeBar": False})
 
     # Triggered events table up to current scrubber date
-    st.markdown(
+    render_html(
         f"""
         <div class="white-card">
             <div class="card-title">
                 <span>Triggered Stress Shocks Up to {selected_date}</span>
             </div>
         </div>
-        """,
-        unsafe_allow_html=True,
+        """
     )
 
     events_in_window = [
