@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import hashlib
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
 from typing import Any
 
 
@@ -48,6 +47,6 @@ class Document:
         return asdict(self)
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "Document":
+    def from_dict(cls, data: dict[str, Any]) -> Document:
         """Reconstruct a Document from a dict (e.g. loaded from JSON)."""
         return cls(**data)

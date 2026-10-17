@@ -174,9 +174,8 @@ class EntityCatalog:
                     ):
                         unmapped_orgs.add(clean_text)
 
-                elif ent.label_ in ("GPE", "LOC"):
-                    if not any(c.lower() == clean_text.lower() for c in matched_countries):
-                        unmapped_gpes.add(clean_text)
+                elif ent.label_ in ("GPE", "LOC") and not any(c.lower() == clean_text.lower() for c in matched_countries):
+                    unmapped_gpes.add(clean_text)
         else:
             # Fast regex fallback for unknown organizations when spaCy is not installed
             cap_phrases = re.findall(r"\b[A-Z][a-zA-Z0-9]+(?:\s+[A-Z][a-zA-Z0-9]+)*\b", text)
@@ -191,9 +190,8 @@ class EntityCatalog:
                     or any(c.lower() == phrase.lower() for c in matched_countries)
                     or any(s.lower() == phrase.lower() for s in matched_sectors)
                 )
-                if not already_known:
-                    if any(phrase.endswith(s) for s in org_suffixes) or len(phrase.split()) >= 2:
-                        unmapped_orgs.add(phrase)
+                if not already_known and (any(phrase.endswith(s) for s in org_suffixes) or len(phrase.split()) >= 2):
+                    unmapped_orgs.add(phrase)
 
         return ExtractedEntities(
             companies=list(matched_companies.values()),

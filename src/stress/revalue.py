@@ -19,7 +19,6 @@ import math
 from dataclasses import asdict, dataclass
 from typing import Any
 
-from src.ingest.helpers import load_config
 from src.portfolio.schema import Portfolio, Position
 
 # Energy-consuming sectors that suffer margin compression when oil prices spike

@@ -4,17 +4,15 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from src.scoring.calibration import ImpactCalibrator, get_calibrator
+from src.scoring.calibration import ImpactCalibrator
 from src.scoring.event_study import (
     compute_event_study,
     compute_factor_daily_changes,
     fetch_price_history,
     resolve_event_asset,
 )
-from src.scoring.pipeline import process_signals
-from src.scoring.schema import Event, Signal
+from src.scoring.schema import Signal
 
 
 def test_resolve_event_asset_mapping():
@@ -101,7 +99,7 @@ def test_isotonic_calibrator_time_split_fit():
     assert "p_value" in metrics
 
     # Test monotonic prediction
-    low_score, meta_low = calib.predict_score(0.10)
+    low_score, _meta_low = calib.predict_score(0.10)
     high_score, meta_high = calib.predict_score(0.90)
 
     assert 1.0 <= low_score <= 10.0

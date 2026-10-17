@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from src.ingest.schema import Document
 from src.nlp.entities import extract_entities
 from src.nlp.events import ALLOWED_EVENT_TYPES, classify_event

@@ -14,7 +14,6 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
-from collections import Counter
 from pathlib import Path
 
 # Add project root to sys.path

@@ -3,7 +3,6 @@
 import json
 from datetime import date
 from pathlib import Path
-from unittest.mock import patch
 
 from src.ingest.gdelt import fetch_gdelt
 

@@ -51,7 +51,7 @@ nlp:
     batch_size: 16
   events:
     provider: "gemini"  # options: "zero_shot", "gemini"
-    gemini_model: "gemini-flash-latest"  # fast Google Flash model (gemini-2.5-flash / gemini-3.8-flash)
+    gemini_model: "gemini-1.5-flash"  # Google Gemini Flash model
     zero_shot_model: "facebook/bart-large-mnli"
 
 scoring:

@@ -10,16 +10,13 @@ Calculates:
 
 from __future__ import annotations
 
-import os
 import re
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from src.ingest.helpers import load_config
 from src.scoring.schema import Event
 
 # Sector to US ETF Proxy mapping

@@ -13,7 +13,6 @@ Steps:
 from __future__ import annotations
 
 import hashlib
-import math
 from datetime import datetime, timezone
 from typing import Any
 
@@ -131,7 +130,6 @@ def cluster_documents(
         doc_dt = parse_timestamp(doc.published_at)
 
         best_cluster_idx = -1
-        best_similarity = -1.0
 
         if clusters:
             # Build active candidates whose latest_dt is within rolling window
@@ -158,15 +156,13 @@ def cluster_documents(
 
                 if top_sim >= similarity_threshold:
                     best_cluster_idx = top_active_idx
-                    best_similarity = top_sim
 
         if best_cluster_idx >= 0:
             # Add to matching cluster and update centroid
             c = clusters[best_cluster_idx]
             c["docs"].append(doc)
             c["embeddings"].append(doc_emb[0])
-            if doc_dt > c["latest_dt"]:
-                c["latest_dt"] = doc_dt
+            c["latest_dt"] = max(c["latest_dt"], doc_dt)
 
             # Update centroid
             new_centroid = np.mean(c["embeddings"], axis=0, keepdims=True).astype(np.float32)
@@ -281,7 +277,7 @@ def aggregate_cluster(cluster_docs: list[AnalysedDoc], cluster_embeddings: list[
     }
 
     # 6. Source counts & divergence flag
-    distinct_sources = sorted(set(d.source.lower() for d in cluster_docs))
+    distinct_sources = sorted({d.source.lower() for d in cluster_docs})
     n_distinct_sources = len(distinct_sources)
 
     div_cfg = agg_cfg.get("divergence", {})

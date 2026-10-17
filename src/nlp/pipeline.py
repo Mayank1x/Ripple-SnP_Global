@@ -11,13 +11,12 @@ Transforms ingested Documents into AnalysedDocs containing:
 from __future__ import annotations
 
 import re
-from typing import Any
 
 from src.ingest.schema import Document
 from src.nlp.entities import extract_entities
-from src.nlp.events import classify_event, classify_event_batch
+from src.nlp.events import classify_event_batch
 from src.nlp.schema import AnalysedDoc
-from src.nlp.sentiment import analyse_sentiment, analyse_sentiment_batch
+from src.nlp.sentiment import analyse_sentiment_batch
 
 # Baseline impact score mapping by event type
 _EVENT_BASE_IMPACT = {

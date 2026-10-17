@@ -102,8 +102,7 @@ def main() -> None:
     out_path = Path("data/raw/merged_articles.jsonl")
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with open(out_path, "w", encoding="utf-8") as fh:
-        for doc in clean_docs:
-            fh.write(json.dumps(doc.to_dict(), ensure_ascii=False) + "\n")
+        fh.writelines(json.dumps(doc.to_dict(), ensure_ascii=False) + "\n" for doc in clean_docs)
 
     print(f"\nMerged output written to {out_path} ({len(clean_docs)} docs)")
 

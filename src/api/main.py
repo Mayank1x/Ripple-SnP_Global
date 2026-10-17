@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
+from contextlib import asynccontextmanager
 from typing import Any, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.scoring.store import get_signal_by_id, init_db, query_signals
-
-from contextlib import asynccontextmanager
 
 
 @asynccontextmanager

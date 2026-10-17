@@ -10,13 +10,13 @@ Verifies:
 
 import json
 from pathlib import Path
+
 import pytest
 
 from src.portfolio.schema import Portfolio, Position
 from src.stress.revalue import revalue_portfolio, revalue_position
 from src.stress.run import stress
-from src.stress.shocks import compute_factor_shocks, find_analogs
-
+from src.stress.shocks import compute_factor_shocks
 
 # =====================================================================
 # 1. Financial Invariant Tests

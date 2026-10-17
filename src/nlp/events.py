@@ -18,7 +18,6 @@ Returns (label, confidence, reason) and caches results by doc_id.
 from __future__ import annotations
 
 import json
-import os
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path
@@ -401,8 +400,8 @@ def _classify_gemini(text: str) -> EventClassificationResult:
         return _classify_zero_shot(text)
 
     cfg = load_config()
-    model_candidate = cfg.get("nlp", {}).get("events", {}).get("gemini_model", "gemini-flash-latest")
-    candidate_models = [model_candidate, "gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-flash"]
+    model_candidate = cfg.get("nlp", {}).get("events", {}).get("gemini_model", "gemini-1.5-flash")
+    candidate_models = [model_candidate, "gemini-1.5-flash", "gemini-2.0-flash", "gemini-flash-latest", "gemini-2.5-flash"]
     # Deduplicate while preserving order
     models_to_try = []
     for m in candidate_models:

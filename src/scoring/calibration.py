@@ -8,18 +8,14 @@ Produces calibrated impact scores in 1.0 to 10.0.
 from __future__ import annotations
 
 import json
-from datetime import datetime
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 from scipy import stats
 from sklearn.isotonic import IsotonicRegression
-
-from src.ingest.helpers import load_config
-from src.scoring.event_study import compute_event_study
-from src.scoring.schema import Event, Signal
 
 CALIBRATION_DIR = Path("data/calibration")
 

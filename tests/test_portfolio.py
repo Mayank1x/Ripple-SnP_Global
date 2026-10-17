@@ -1,12 +1,11 @@
 """Tests for Phase 5 - Synthetic Portfolio, Exposure Graph, and Contagion Propagation."""
 
 from pathlib import Path
+
 import pytest
-import networkx as nx
 
-from src.portfolio.schema import Position, Portfolio
 from src.portfolio.graph import ExposureGraph, build_exposure_graph
-
+from src.portfolio.schema import Portfolio, Position
 
 # =====================================================================
 # 1. Toy Graph Propagation Tests (Crucial User Requirement)

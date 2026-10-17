@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import math
 from datetime import datetime
-from typing import Any
 
 import numpy as np
 
@@ -164,7 +163,7 @@ def score_events(events: list[Event]) -> list[tuple[Event, float]]:
         ]
 
         novelty = compute_novelty(event_emb, recent_priors)
-        raw_impact, uncalibrated_score, _ = calculate_impact(event, novelty=novelty)
+        raw_impact, _uncalibrated_score, _ = calculate_impact(event, novelty=novelty)
 
         # Apply empirical isotonic calibration if available
         from src.scoring.calibration import get_calibrator

@@ -106,14 +106,14 @@ def main() -> None:
     print("-" * 72)
 
     print("Loss by Asset Class:")
-    for ac, l in result.loss_by_asset_class.items():
-        pct = (l / loss_50 * 100.0) if loss_50 > 0 else 0.0
-        print(f"  * {ac:<15}: ${l / 1e6:7.2f}M  ({pct:5.1f}%)")
+    for ac, loss_amt in result.loss_by_asset_class.items():
+        pct = (loss_amt / loss_50 * 100.0) if loss_50 > 0 else 0.0
+        print(f"  * {ac:<15}: ${loss_amt / 1e6:7.2f}M  ({pct:5.1f}%)")
 
     print("\nTop 5 Sector Losses:")
-    for sec, l in list(result.loss_by_sector.items())[:5]:
-        pct = (l / loss_50 * 100.0) if loss_50 > 0 else 0.0
-        print(f"  * {sec:<22}: ${l / 1e6:7.2f}M  ({pct:5.1f}%)")
+    for sec, loss_amt in list(result.loss_by_sector.items())[:5]:
+        pct = (loss_amt / loss_50 * 100.0) if loss_50 > 0 else 0.0
+        print(f"  * {sec:<22}: ${loss_amt / 1e6:7.2f}M  ({pct:5.1f}%)")
 
     print("\nTop 5 Impacted Counterparties:")
     for p in result.top_10_positions[:5]:

@@ -12,12 +12,15 @@ Pages:
 from __future__ import annotations
 
 import os
+
 # Ensure offline execution from local huggingface / torch cache
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
 import json
-from datetime import datetime
+
+# Ensure project root is in sys.path
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -28,18 +31,13 @@ import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
-# Ensure project root is in sys.path
-import sys
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from src.ingest.helpers import load_config
 from src.portfolio.graph import ExposureGraph, build_exposure_graph
 from src.portfolio.schema import Portfolio
 from src.stress.run import StressResult, stress
-from src.stress.shocks import compute_factor_shocks
-
 
 # =====================================================================
 # Page Configuration & Styling
@@ -201,8 +199,19 @@ with st.sidebar:
     st.text(f"Portfolio Positions : {len(port.positions)}")
     st.text(f"Total Economic Exp. : ${port.value() / 1e9:.2f}B")
     st.text(f"Processed Signals   : {len(signals)}")
-    st.text(f"Status              : Offline Ready")
+    st.text("Status              : Offline Ready")
 
+
+# Display automated fallback banner if active
+status_path = ROOT_DIR / "data" / "signals" / "ingestion_status.json"
+if status_path.exists():
+    try:
+        with open(status_path, "r", encoding="utf-8") as f:
+            status_info = json.load(f)
+        if status_info.get("fallback") and status_info.get("banner"):
+            st.warning(f"⚠️ **Live Ingestion Fallback**: {status_info.get('banner')}")
+    except Exception:
+        pass
 
 # =====================================================================
 # VIEW 1: Live Signals Feed
@@ -316,10 +325,14 @@ if nav_page == "1. Live Signals Feed":
                 comms = ents.get("commodities", [])
 
                 e_str = []
-                if comps: e_str.append(f"🏢 **Companies**: {', '.join(comps)}")
-                if secs: e_str.append(f"🏭 **Sectors**: {', '.join(secs)}")
-                if ctrys: e_str.append(f"🌍 **Countries**: {', '.join(ctrys)}")
-                if comms: e_str.append(f"🛢️ **Commodities**: {', '.join(comms)}")
+                if comps:
+                    e_str.append(f"🏢 **Companies**: {', '.join(comps)}")
+                if secs:
+                    e_str.append(f"🏭 **Sectors**: {', '.join(secs)}")
+                if ctrys:
+                    e_str.append(f"🌍 **Countries**: {', '.join(ctrys)}")
+                if comms:
+                    e_str.append(f"🛢️ **Commodities**: {', '.join(comms)}")
                 if e_str:
                     st.markdown("\n".join([f"- {x}" for x in e_str]))
                 else:
@@ -554,14 +567,18 @@ elif nav_page == "3. Network Contagion Map":
     seeds = []
     ents = sel_sig.get("entities", {})
     for sec in ents.get("sectors", []):
-        if sec in eg.g: seeds.append(sec)
+        if sec in eg.g:
+            seeds.append(sec)
     for ctry in ents.get("countries", []):
-        if ctry in eg.g: seeds.append(ctry)
+        if ctry in eg.g:
+            seeds.append(ctry)
     for comm in ents.get("commodities", []):
-        if comm in eg.g: seeds.append(comm)
+        if comm in eg.g:
+            seeds.append(comm)
     for comp in ents.get("companies", []):
         cname = comp.get("name") if isinstance(comp, dict) else comp
-        if cname in eg.g: seeds.append(cname)
+        if cname in eg.g:
+            seeds.append(cname)
     if not seeds:
         seeds = ["Real Estate" if "Real Estate" in eg.g else "Financials"]
 

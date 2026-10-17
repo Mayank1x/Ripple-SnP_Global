@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import json
 import sys
-from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import matplotlib
+
 matplotlib.use("Agg")  # Non-interactive backend
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,7 +21,7 @@ import numpy as np
 # Add project root to sys.path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from src.scoring.calibration import ImpactCalibrator, get_calibrator
+from src.scoring.calibration import ImpactCalibrator
 from src.scoring.event_study import compute_event_study, compute_factor_daily_changes
 from src.scoring.impact import calculate_impact
 from src.scoring.schema import Event, Signal
@@ -87,7 +87,7 @@ def generate_calibration_chart(
     plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 
     colors = plt.cm.viridis(np.linspace(0.3, 0.9, len(buckets)))
-    bars = plt.bar(
+    plt.bar(
         buckets,
         means,
         yerr=sems,

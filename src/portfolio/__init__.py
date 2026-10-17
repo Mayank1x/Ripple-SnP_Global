@@ -4,8 +4,8 @@ from src.portfolio.graph import ExposureGraph, build_exposure_graph
 from src.portfolio.schema import Portfolio, Position
 
 __all__ = [
-    "Position",
-    "Portfolio",
     "ExposureGraph",
+    "Portfolio",
+    "Position",
     "build_exposure_graph",
 ]

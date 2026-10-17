@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import numpy as np
-import pytest
 
 from src.nlp.schema import AnalysedDoc
 from src.scoring.cluster import aggregate_cluster, cluster_documents, embed_texts
-from src.scoring.impact import calculate_impact, compute_novelty, score_events
-from src.scoring.schema import Event, Signal
-from src.scoring.store import get_signal_by_id, init_db, query_signals, save_signals
+from src.scoring.impact import calculate_impact, compute_novelty
+from src.scoring.schema import Signal
+from src.scoring.store import get_signal_by_id, query_signals, save_signals
 
 
 def _make_dummy_doc(

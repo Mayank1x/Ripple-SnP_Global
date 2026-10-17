@@ -10,10 +10,10 @@ without any exceptions or missing dependencies:
 """
 
 import os
+
 os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ["TRANSFORMERS_OFFLINE"] = "1"
 
-import pytest
 from streamlit.testing.v1 import AppTest
 
 

@@ -53,7 +53,7 @@ class Event:
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Event:
         copied = dict(data)
-        if "docs" in copied and copied["docs"]:
+        if copied.get("docs"):
             copied["docs"] = [
                 AnalysedDoc.from_dict(d) if isinstance(d, dict) else d for d in copied["docs"]
             ]

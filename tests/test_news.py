@@ -6,7 +6,6 @@ from pathlib import Path
 
 from src.ingest.news import fetch_news
 
-
 # Minimal NewsAPI response fixture matching real API shape.
 NEWSAPI_FIXTURE = [
     {
