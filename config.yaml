@@ -50,7 +50,8 @@ nlp:
     model_name: "ProsusAI/finbert"
     batch_size: 16
   events:
-    provider: "zero_shot"  # options: "zero_shot", "gemini"
+    provider: "gemini"  # options: "zero_shot", "gemini"
+    gemini_model: "gemini-flash-latest"  # fast Google Flash model (gemini-2.5-flash / gemini-3.8-flash)
     zero_shot_model: "facebook/bart-large-mnli"
 
 scoring:

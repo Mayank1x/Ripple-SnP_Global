@@ -400,6 +400,15 @@ def _classify_gemini(text: str) -> EventClassificationResult:
     if not api_key:
         return _classify_zero_shot(text)
 
+    cfg = load_config()
+    model_candidate = cfg.get("nlp", {}).get("events", {}).get("gemini_model", "gemini-flash-latest")
+    candidate_models = [model_candidate, "gemini-flash-latest", "gemini-3.8-flash", "gemini-2.5-flash"]
+    # Deduplicate while preserving order
+    models_to_try = []
+    for m in candidate_models:
+        if m not in models_to_try:
+            models_to_try.append(m)
+
     prompt = (
         "You are an expert financial risk officer. Classify the following headline/news "
         "into exactly ONE of these categories:\n"
@@ -417,31 +426,38 @@ def _classify_gemini(text: str) -> EventClassificationResult:
         f'Text: "{text[:500]}"'
     )
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
     payload = {
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {"response_mime_type": "application/json"},
     }
 
-    try:
-        resp = requests.post(url, json=payload, timeout=15)
-        resp.raise_for_status()
-        data = resp.json()
-        raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
-        parsed = json.loads(raw_text)
+    last_error = None
+    for model_name in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={api_key}"
+        try:
+            resp = requests.post(url, json=payload, timeout=15)
+            if resp.status_code == 200:
+                data = resp.json()
+                raw_text = data["candidates"][0]["content"]["parts"][0]["text"]
+                parsed = json.loads(raw_text)
 
-        label = parsed.get("event_type", "Other")
-        if label not in ALLOWED_EVENT_TYPES:
-            label = "Other"
+                label = parsed.get("event_type", "Other")
+                if label not in ALLOWED_EVENT_TYPES:
+                    label = "Other"
 
-        return EventClassificationResult(
-            event_type=label,
-            confidence=float(parsed.get("confidence", 0.90)),
-            reason=str(parsed.get("reason", "Classified by Gemini 1.5 Flash.")),
-        )
-    except Exception as exc:
-        print(f"  [events] Gemini API call failed: {exc}, falling back to zero-shot.")
-        return _classify_zero_shot(text)
+                return EventClassificationResult(
+                    event_type=label,
+                    confidence=round(float(parsed.get("confidence", 0.92)), 4),
+                    reason=str(parsed.get("reason", f"Classified by Google Gemini ({model_name}).")),
+                )
+            else:
+                last_error = f"{model_name} returned status {resp.status_code}"
+        except Exception as exc:
+            last_error = str(exc)
+            continue
+
+    print(f"  [events] Gemini API call failed: {last_error}, falling back to zero-shot.")
+    return _classify_zero_shot(text)
 
 
 # ---------------------------------------------------------------------------
