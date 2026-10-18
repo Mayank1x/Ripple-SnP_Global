@@ -98,29 +98,40 @@ def run_pipeline(
         start_d = today - timedelta(days=2)
         end_d = today + timedelta(days=1)
 
+        # 1. NewsAPI / RSS
+        logger.info("Fetching news articles...")
         try:
-            # 1. NewsAPI / RSS
-            logger.info("Fetching news articles...")
             news_docs = fetch_news(search_query, start_d, end_d, use_cache=False)
             raw_docs.extend(news_docs)
+            logger.info(f"NewsAPI / RSS gathered {len(news_docs)} articles.")
+        except Exception as exc:
+            logger.warning(f"News fetch failed: {exc}")
 
-            # 2. GDELT
-            logger.info("Fetching GDELT global events...")
+        # 2. GDELT
+        logger.info("Fetching GDELT global events...")
+        try:
             gdelt_docs = fetch_gdelt(search_query, start_d, end_d, use_cache=False)
             raw_docs.extend(gdelt_docs)
+            logger.info(f"GDELT gathered {len(gdelt_docs)} events.")
+        except Exception as exc:
+            logger.warning(f"GDELT live fetch failed: {exc}. Continuing with available documents.")
 
-            # 3. Tweets
-            logger.info("Loading recent tweets...")
+        # 3. Tweets
+        logger.info("Loading recent tweets...")
+        try:
             tweet_docs = load_tweets()
             raw_docs.extend(tweet_docs)
+            logger.info(f"Tweets gathered {len(tweet_docs)} documents.")
+        except Exception as exc:
+            logger.warning(f"Tweet load failed: {exc}")
 
+        if raw_docs:
             logger.info(f"Live ingestion succeeded with {len(raw_docs)} raw documents.")
             save_ingestion_status(mode="live", fallback=False, banner=None, doc_count=len(raw_docs))
-
-        except Exception as exc:
-            logger.warning(f"Live API ingestion failed: {exc}. Gracefully falling back to local cached replay data.")
+        else:
+            logger.warning("No documents collected from live endpoints. Gracefully falling back to local cached replay data.")
             fallback_active = True
-            fallback_banner = f"Live API unavailable ({exc}); fell back to cached replay data."
+            fallback_banner = "Live APIs rate-limited; fell back to cached replay data."
             save_ingestion_status(mode="live", fallback=True, banner=fallback_banner, doc_count=0)
 
     # Replay mode OR Fallback from live failure

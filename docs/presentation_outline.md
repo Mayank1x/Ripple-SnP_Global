@@ -1,9 +1,9 @@
 # 7-Slide Presentation Deck Outline: Ripple Risk Engine
 
 **S&P Global & CRISIL Campus Hackathon 2026**  
-**Module B: Strategic Event-Driven Portfolio Stress-Testing Tool**
+**Dual-Module Track: Module A (Tactical Index Rebalancer) & Module B (Strategic Event-Driven Portfolio Stress-Testing Tool)**
 
-This document provides the slide-by-slide structure, talking points, and screenshot assignments for the final presentation deck (`docs/presentation.pdf`).
+This document provides a slide outline. For the complete, authoritative master presentation deck and full script, see [presentation.md](presentation.md).
 
 ---
 

@@ -258,25 +258,77 @@ html, body, .stApp, div[data-testid="stAppViewContainer"] {{
 
 /* Container Spacing */
 .block-container {{
-    padding-top: 0.75rem !important;
-    padding-bottom: 2rem !important;
-    padding-left: 1.75rem !important;
-    padding-right: 1.75rem !important;
+    padding-top: 0.35rem !important;
+    padding-bottom: 1.5rem !important;
+    padding-left: 1.25rem !important;
+    padding-right: 1.25rem !important;
     max-width: 100% !important;
 }}
 
-/* Navigation Radio Pills */
+/* Hide All Native Radio Circles and Dots Completely (Without breaking input event bubbling) */
+div[data-testid="stRadio"] label[data-baseweb="radio"] > div:first-child,
+div[data-testid="stRadio"] [data-baseweb="radio"] > div:first-child,
+div[data-testid="stRadio"] label[data-baseweb="radio"] svg {{
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}}
+div[data-testid="stRadio"] input[type="radio"] {{
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+}}
+
+/* Segmented Radio Group Container (Tabs & Toggles - Compact Executive Design) */
 div[data-testid="stRadio"] > div[role="radiogroup"] {{
-    gap: 0.35rem !important;
-    background-color: {c_surface} !important;
-    padding: 0.3rem 0.6rem !important;
+    gap: 2px !important;
+    background-color: {c_surface_subtle} !important;
+    padding: 2px !important;
     border-radius: 4px !important;
     border: 1px solid {c_border_subtle} !important;
+    display: inline-flex !important;
+    align-items: center !important;
 }}
-div[data-testid="stRadio"] label p {{
-    font-size: 0.84rem !important;
+div[data-testid="stRadio"] div[data-baseweb="radio"] {{
+    margin: 0 !important;
+    padding: 0 !important;
+}}
+div[data-testid="stRadio"] label[data-baseweb="radio"] {{
+    margin: 0 !important;
+    padding: 3px 9px !important;
+    border-radius: 3px !important;
+    cursor: pointer !important;
+    transition: all 0.15s ease !important;
+    background-color: transparent !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    border: 1px solid transparent !important;
+}}
+div[data-testid="stRadio"] label[data-baseweb="radio"]:hover {{
+    background-color: {'rgba(45, 107, 255, 0.12)' if dark_mode else '#E2E8F0'} !important;
+}}
+div[data-testid="stRadio"] label[data-baseweb="radio"] p {{
+    margin: 0 !important;
+    font-size: 0.76rem !important;
     font-weight: 500 !important;
-    color: {c_text_primary} !important;
+    color: {c_text_secondary} !important;
+    white-space: nowrap !important;
+}}
+div[data-testid="stRadio"] label[data-baseweb="radio"]:has(input:checked) {{
+    background-color: {'#2D6BFF' if dark_mode else '#FFFFFF'} !important;
+    border: 1px solid {'#1D4ED8' if dark_mode else '#CBD5E1'} !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1) !important;
+}}
+div[data-testid="stRadio"] label[data-baseweb="radio"]:has(input:checked) p {{
+    color: {'#FFFFFF' if dark_mode else '#1E40AF'} !important;
+    font-weight: 600 !important;
 }}
 
 /* Hero Band Container */
@@ -284,9 +336,9 @@ div[data-testid="stRadio"] label p {{
     background-color: {c_surface};
     border: 1px solid {c_border_subtle};
     border-radius: 4px;
-    padding: 1.15rem 1.35rem;
+    padding: 0.75rem 1rem;
     color: {c_text_primary};
-    margin-bottom: 0.85rem;
+    margin-bottom: 0.55rem;
     box-shadow: { 'none' if dark_mode else '0 1px 3px rgba(0,0,0,0.05)' };
 }}
 .hero-title {{
@@ -376,18 +428,18 @@ div[data-testid="stRadio"] label p {{
     background-color: {c_surface};
     border: 1px solid {c_border_subtle};
     border-radius: 4px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.85rem;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.55rem;
     color: {c_text_primary};
     box-shadow: { 'none' if dark_mode else '0 1px 3px rgba(0,0,0,0.04)' };
 }}
 .card-title {{
-    font-size: 0.88rem;
+    font-size: 0.82rem;
     font-weight: 600;
     color: {c_text_primary} !important;
-    margin-bottom: 0.65rem;
+    margin-bottom: 0.45rem;
     border-bottom: 1px solid {c_border_subtle};
-    padding-bottom: 0.4rem;
+    padding-bottom: 0.3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -396,9 +448,9 @@ div[data-testid="stRadio"] label p {{
 /* Status Chips */
 .chip {{
     display: inline-block;
-    font-size: 0.72rem;
+    font-size: 0.70rem;
     font-weight: 600;
-    padding: 0.2rem 0.55rem;
+    padding: 0.15rem 0.45rem;
     border-radius: 3px;
     letter-spacing: 0.1px;
 }}
@@ -438,24 +490,32 @@ div[data-testid="stRadio"] label p {{
     border: 1px solid {chip_neut_border};
 }}
 
-/* Streamlit Metrics */
+/* Streamlit Metrics (Compact Institutional Cards) */
 div[data-testid="stMetric"] {{
     background-color: {c_surface} !important;
     border: 1px solid {c_border_subtle} !important;
     border-radius: 4px !important;
-    padding: 0.65rem 0.85rem !important;
+    padding: 0.45rem 0.65rem !important;
     box-shadow: { 'none' if dark_mode else '0 1px 3px rgba(0,0,0,0.04)' } !important;
 }}
 div[data-testid="stMetricLabel"] p {{
-    font-size: 0.75rem !important;
+    font-size: 0.72rem !important;
     font-weight: 500 !important;
     color: {c_text_secondary} !important;
 }}
 div[data-testid="stMetricValue"] {{
-    font-size: 1.35rem !important;
+    font-size: 1.15rem !important;
     font-weight: 600 !important;
     color: {c_text_primary} !important;
     font-variant-numeric: tabular-nums !important;
+}}
+div[data-testid="stMetricDelta"],
+div[data-testid="stMetricDelta"] * {{
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
+}}
+div[data-testid="stMetricDelta"] > div {{
+    color: {c_text_secondary} !important;
 }}
 
 /* Tables & Glide Data Grid */
@@ -520,14 +580,23 @@ div[data-baseweb="input"]:focus-within {{
     border-color: {ACCENT_BLUE} !important;
     box-shadow: 0 0 0 1px {ACCENT_BLUE} !important;
 }}
-div[data-testid="stSelectbox"] div[data-baseweb="select"] {{
+div[data-testid="stSelectbox"] div[data-baseweb="select"],
+div[data-testid="stSelectbox"] div[data-baseweb="select"] > div,
+div[data-testid="stSelectbox"] div[data-baseweb="select"] div,
+div[data-testid="stSelectbox"] [data-baseweb="select"] {{
     background-color: {c_surface} !important;
     color: {c_text_primary} !important;
-    border: 1px solid {c_border_strong} !important;
-    border-radius: 4px !important;
+    border-color: {c_border_strong} !important;
 }}
-div[data-testid="stSelectbox"] div[data-baseweb="select"] * {{
+div[data-testid="stSelectbox"] [data-baseweb="select"] span,
+div[data-testid="stSelectbox"] [data-baseweb="select"] p,
+div[data-testid="stSelectbox"] [data-baseweb="select"] div[aria-selected="true"] {{
     color: {c_text_primary} !important;
+    font-weight: 500 !important;
+}}
+div[data-testid="stSelectbox"] svg {{
+    fill: {c_text_secondary} !important;
+    color: {c_text_secondary} !important;
 }}
 div[data-baseweb="popover"],
 div[data-baseweb="menu"],
@@ -622,15 +691,31 @@ div[data-testid="stButton"] button:hover {{
     color: {ACCENT_BLUE} !important;
     box-shadow: 0 2px 6px rgba(45, 107, 255, 0.15) !important;
 }}
+
+/* Primary Action Button (Execute Pipeline - Always Crisp Blue with White Text) */
+button[data-testid="baseButton-primary"],
+button[kind="primary"],
+div[data-testid="stButton"] button[data-testid="baseButton-primary"],
 div[data-testid="stButton"] button[kind="primary"] {{
-    background-color: {NAVY_DEEP if dark_mode else "#1E40AF"} !important;
-    border: 1px solid {ACCENT_BLUE} !important;
+    background-color: #2D6BFF !important;
+    border: 1px solid #1D4ED8 !important;
     color: #FFFFFF !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(45, 107, 255, 0.25) !important;
 }}
-div[data-testid="stButton"] button[kind="primary"]:hover {{
-    background-color: {ACCENT_BLUE} !important;
+button[data-testid="baseButton-primary"] p,
+button[data-testid="baseButton-primary"] span,
+button[data-testid="baseButton-primary"] div,
+button[kind="primary"] p,
+button[kind="primary"] span,
+button[kind="primary"] div {{
     color: #FFFFFF !important;
-    box-shadow: 0 3px 8px rgba(45, 107, 255, 0.3) !important;
+    font-weight: 600 !important;
+}}
+button[data-testid="baseButton-primary"]:hover,
+button[kind="primary"]:hover {{
+    background-color: #1D4ED8 !important;
+    box-shadow: 0 4px 10px rgba(45, 107, 255, 0.4) !important;
 }}
 
 /* Institutional Download Buttons */
@@ -645,13 +730,22 @@ div[data-testid="stDownloadButton"] button {{
     color: {'#60A5FA' if dark_mode else '#1D4ED8'} !important;
     transition: all 0.15s ease-in-out !important;
 }}
+div[data-testid="stDownloadButton"] button p,
+div[data-testid="stDownloadButton"] button span {{
+    color: {'#60A5FA' if dark_mode else '#1D4ED8'} !important;
+    font-weight: 600 !important;
+}}
 div[data-testid="stDownloadButton"] button:hover {{
     background-color: {ACCENT_BLUE} !important;
     color: #FFFFFF !important;
     box-shadow: 0 3px 8px rgba(45, 107, 255, 0.25) !important;
 }}
+div[data-testid="stDownloadButton"] button:hover p,
+div[data-testid="stDownloadButton"] button:hover span {{
+    color: #FFFFFF !important;
+}}
 
-/* Institutional Sliders */
+/* Institutional Sliders (Always Blue Track and Thumb) */
 div[data-testid="stSlider"] div[data-baseweb="slider"] {{
     padding-top: 0.3rem !important;
     padding-bottom: 0.3rem !important;
@@ -661,15 +755,21 @@ div[data-testid="stSlider"] label p {{
     font-weight: 500 !important;
     color: {c_text_primary} !important;
 }}
-
-/* Radio Navigation Tabs Active State */
-div[data-testid="stRadio"] label:has(input:checked) {{
-    background-color: {'rgba(45, 107, 255, 0.16)' if dark_mode else '#DBEAFE'} !important;
-    border-radius: 3px !important;
+div[data-testid="stSlider"] div[data-baseweb="slider"] div[role="slider"] {{
+    background-color: #2D6BFF !important;
+    border-color: #2D6BFF !important;
 }}
-div[data-testid="stRadio"] label:has(input:checked) p {{
-    color: {'#60A5FA' if dark_mode else '#1D4ED8'} !important;
+div[data-testid="stSlider"] div[data-baseweb="slider"] > div > div:first-child {{
+    background: #2D6BFF !important;
+}}
+div[data-testid="stSlider"] [data-testid="stThumbValue"] {{
+    color: #2D6BFF !important;
     font-weight: 600 !important;
+    font-variant-numeric: tabular-nums !important;
+}}
+div[data-testid="stSlider"] div[data-testid="stTickBarMin"],
+div[data-testid="stSlider"] div[data-testid="stTickBarMax"] {{
+    color: {c_text_secondary} !important;
 }}
 
 /* Dividers */

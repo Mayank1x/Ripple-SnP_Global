@@ -85,9 +85,9 @@ def fetch_json(
     url: str,
     params: dict[str, Any] | None = None,
     headers: dict[str, str] | None = None,
-    retries: int = 5,
-    backoff_base: float = 6.0,
-    timeout: int = 30,
+    retries: int = 2,
+    backoff_base: float = 2.0,
+    timeout: int = 15,
 ) -> dict | list:
     """GET a URL and return parsed JSON. Retries on transient errors.
 
@@ -114,9 +114,9 @@ def fetch_json(
                     resp.raise_for_status()
                 retry_after = resp.headers.get("Retry-After")
                 if retry_after and retry_after.isdigit():
-                    wait = max(float(retry_after), backoff_base * attempt)
+                    wait = min(float(retry_after), 4.0)
                 else:
-                    wait = backoff_base * attempt
+                    wait = min(backoff_base * attempt, 4.0)
                 print(f"  [retry {attempt}/{retries}] HTTP {resp.status_code} - waiting {wait:.0f}s")
                 time.sleep(wait)
                 continue
@@ -126,7 +126,7 @@ def fetch_json(
             last_exc = exc
             if attempt == retries:
                 raise
-            wait = backoff_base * attempt
+            wait = min(backoff_base * attempt, 3.0)
             print(f"  [retry {attempt}/{retries}] {exc!r} - waiting {wait:.0f}s")
             time.sleep(wait)
         except (ValueError, requests.exceptions.JSONDecodeError) as exc:
@@ -134,7 +134,7 @@ def fetch_json(
             last_exc = exc
             if attempt == retries:
                 raise
-            wait = backoff_base * attempt
+            wait = min(backoff_base * attempt, 3.0)
             print(f"  [retry {attempt}/{retries}] Bad JSON response - waiting {wait:.0f}s")
             time.sleep(wait)
     raise RuntimeError(f"fetch_json: all retries exhausted: {last_exc}")

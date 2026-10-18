@@ -35,6 +35,38 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+# Compatibility shim: Streamlit >= 1.50 deprecated use_container_width in favor of width="stretch"
+_ST_MAJOR_MINOR = tuple(int(x) for x in st.__version__.split(".")[:2] if x.isdigit())
+_orig_df = st.dataframe
+_orig_btn = st.button
+_orig_dl_btn = st.download_button
+
+def _compat_dataframe(*args, **kwargs):
+    if _ST_MAJOR_MINOR >= (1, 50):
+        if kwargs.pop("use_container_width", None) is not None or kwargs.get("width") == "stretch":
+            kwargs["width"] = "stretch"
+    else:
+        if kwargs.get("width") == "stretch":
+            kwargs.pop("width")
+            kwargs["use_container_width"] = True
+    return _orig_df(*args, **kwargs)
+
+def _compat_button(*args, **kwargs):
+    if _ST_MAJOR_MINOR >= (1, 50):
+        if kwargs.pop("use_container_width", None) is not None:
+            kwargs["width"] = "stretch"
+    return _orig_btn(*args, **kwargs)
+
+def _compat_download_button(*args, **kwargs):
+    if _ST_MAJOR_MINOR >= (1, 50):
+        if kwargs.pop("use_container_width", None) is not None:
+            kwargs["width"] = "stretch"
+    return _orig_dl_btn(*args, **kwargs)
+
+st.dataframe = _compat_dataframe
+st.button = _compat_button
+st.download_button = _compat_download_button
+
 # Ensure project root in sys.path
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 if str(ROOT_DIR) not in sys.path:
@@ -58,6 +90,9 @@ from src.dashboard.components import (
 )
 from src.dashboard.report import generate_audit_pack_html
 from src.stress.revalue import compute_regulatory_capital, revalue_portfolio
+import importlib
+import src.dashboard.theme as _theme_mod
+importlib.reload(_theme_mod)
 from src.dashboard.theme import (
     ACCENT_BLUE,
     BORDER_STRONG,
@@ -346,11 +381,11 @@ with col_brand:
     brand_muted = "#64748B"
     render_html(
         f"""
-        <div style="padding-top: 4px;">
-            <span style="font-size: 1.05rem; font-weight: 700; color: #2D6BFF; letter-spacing: 0.3px;">RIPPLE RISK ENGINE</span>
-            <span style="font-size: 0.82rem; color: {brand_sub}; margin-left: 8px; font-weight: 500;">S&P Global & CRISIL</span>
-            <div style="font-size: 0.72rem; color: {brand_muted}; margin-top: 2px;">
-                <span style="color: #10B981; font-weight: 600;">● System Online</span> | Replay Window: 2026-09-08 to 2026-10-16 | Wholesale Book: $8.54B (42 Positions)
+        <div style="padding-top: 1px;">
+            <span style="font-size: 0.92rem; font-weight: 700; color: #2D6BFF; letter-spacing: 0.2px;">RIPPLE RISK ENGINE</span>
+            <span style="font-size: 0.74rem; color: {brand_sub}; margin-left: 6px; font-weight: 500;">S&P Global & CRISIL</span>
+            <div style="font-size: 0.67rem; color: {brand_muted}; margin-top: 1px;">
+                <span style="color: #10B981; font-weight: 600;">● Online</span> | Replay: 2026-09-08 to 2026-10-16 | Book: $8.54B (42 Pos)
             </div>
         </div>
         """
@@ -608,7 +643,7 @@ if nav_page == "Overview":
             df_loss = pd.DataFrame(rows)
             st.dataframe(
                 df_loss,
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "Counterparty": st.column_config.TextColumn("Counterparty", width="medium"),
@@ -703,7 +738,7 @@ if nav_page == "Overview":
         df_shifts = pd.DataFrame(table_subset)[["Ticker", "Sector", "Base Weight", "Tilted Weight", "Tilt Delta", "Attribution Headline"]]
         st.dataframe(
             df_shifts,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Ticker": st.column_config.TextColumn("Ticker", width="small"),
@@ -785,7 +820,7 @@ elif nav_page == "Signals":
         if not df_grid.empty:
             selected_row = st.dataframe(
                 df_grid,
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 selection_mode="single-row",
                 on_select="rerun",
@@ -907,7 +942,7 @@ elif nav_page == "Stress test":
         "Basel III CET1 Capital",
         f"{reg_cap['stressed_cet1']*100:.2f}%",
         delta=f"-{reg_cap['depletion_bps']:.0f} bps ({reg_cap['status']})",
-        delta_color="inverse" if not reg_cap["is_compliant"] else "off",
+        delta_color="normal" if reg_cap["is_compliant"] else "inverse",
     )
 
     render_html("<div style='height: 8px;'></div>")
@@ -986,7 +1021,7 @@ elif nav_page == "Stress test":
             {"Crisis Analog": "COVID Market Liquidity Tremor", "Date": "2020-03", "Factor Match": "Multi-Asset", "Quantile": "p75", "Calibrated Shock": "-1.60%"},
             {"Crisis Analog": "Eurozone Sovereign Crisis", "Date": "2011-08", "Factor Match": "Sovereign CDS", "Quantile": "p80", "Calibrated Shock": "-1.85%"},
         ]
-        st.dataframe(pd.DataFrame(analogs), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(analogs), width="stretch", hide_index=True)
         st.caption("Historical analog matching computes Euclidean distance on macro shock vectors with shrinkage weight 0.33 applied to constrain tail bias.")
 
     # =====================================================================
@@ -1188,7 +1223,7 @@ elif nav_page == "Stress test":
         "Stressed CET1 Capital",
         f"{whatif_cap['stressed_cet1']*100:.2f}%",
         delta=f"-{whatif_cap['depletion_bps']:.0f} bps",
-        delta_color="inverse" if not whatif_cap["is_compliant"] else "off",
+        delta_color="normal" if whatif_cap["is_compliant"] else "inverse",
     )
     w_m4.metric(
         "Basel III Capital Headroom",
@@ -1241,7 +1276,7 @@ elif nav_page == "Stress test":
                     "Scenario Loss": f"-{format_currency(p.get('loss', 0), decimals=1)}",
                     "Write-Down (%)": f"-{p.get('loss_pct', 0)*100:.2f}%",
                 })
-            st.dataframe(pd.DataFrame(w_rows), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(w_rows), width="stretch", hide_index=True)
 
     # Download customized scenario audit pack
     custom_run_payload = {
@@ -1387,7 +1422,7 @@ elif nav_page == "Rebalancer":
             "Attribution Headline": headline,
         })
 
-    st.dataframe(pd.DataFrame(records), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(records), width="stretch", hide_index=True)
 
 
 # =====================================================================
@@ -1429,7 +1464,7 @@ elif nav_page == "Model check":
             {"Metric Name": "Brier Calibration Score", "Training Set (Sept 2026)": "0.112", "Out-of-Sample Test (Oct 2026)": "0.138"},
             {"Metric Name": "Directional Accuracy", "Training Set (Sept 2026)": "78.6%", "Out-of-Sample Test (Oct 2026)": "71.4%"},
         ]
-        st.dataframe(pd.DataFrame(eval_metrics), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(eval_metrics), width="stretch", hide_index=True)
         st.caption("Calibration model fits isotonic regression f(x) on raw combined NLP features to predict the absolute 1-day asset move. Lower threshold = 0.70%, upper threshold = 2.38%.")
 
     limitations_text_color = "#CBD5E1" if is_dark else "#334155"
@@ -1512,8 +1547,8 @@ elif nav_page == "Time machine":
     ]
 
     if selected_date >= "2026-10-15":
-        st.dataframe(pd.DataFrame(events_in_window), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(events_in_window), width="stretch", hide_index=True)
     elif selected_date >= "2026-10-14":
-        st.dataframe(pd.DataFrame(events_in_window[1:]), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(events_in_window[1:]), width="stretch", hide_index=True)
     else:
         st.info(f"No high-impact stress triggers encountered up to {selected_date}.")

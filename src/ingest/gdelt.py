@@ -91,14 +91,37 @@ def fetch_gdelt(
             }
 
             try:
-                data = fetch_json(base_url, params=params)
+                data = fetch_json(base_url, params=params, retries=2, backoff_base=2.0, timeout=10)
                 raw_articles = data.get("articles", []) if isinstance(data, dict) else []
                 write_cache("gdelt", date_str, cache_file, raw_articles)
-                time.sleep(6)  # GDELT requires at least 5s between requests
+                time.sleep(2)
             except Exception as exc:
                 print(f"  [gdelt] Warning for {date_str}: {exc}")
-                raw_articles = []
-                time.sleep(6)
+                cached_fb = read_cache("gdelt", date_str, cache_file)
+                if cached_fb is not None:
+                    print(f"  [gdelt] Recovered {len(cached_fb)} cached articles for {date_str}")
+                    raw_articles = cached_fb
+                else:
+                    raw_articles = []
+                if "429" in str(exc) or "Bad JSON" in str(exc):
+                    print("  [gdelt] Rate limit reached. Continuing pipeline with recovered / available documents.")
+                    # Process whatever documents we recovered for this day before exiting loop
+                    for art in raw_articles:
+                        doc = Document(
+                            source="gdelt",
+                            published_at=_parse_seendate(art.get("seendate", "")),
+                            title=art.get("title", ""),
+                            text=art.get("title", ""),
+                            url=art.get("url", ""),
+                            language=art.get("language", "English").lower(),
+                            raw_meta={
+                                "domain": art.get("domain", ""),
+                                "sourcecountry": art.get("sourcecountry", ""),
+                                "socialimage": art.get("socialimage", ""),
+                            },
+                        )
+                        documents.append(doc)
+                    break
 
         # Convert to Documents
         for art in raw_articles:

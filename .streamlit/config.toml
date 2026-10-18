@@ -1,3 +1,6 @@
+[theme]
+primaryColor = "#2D6BFF"
+
 [client]
 showErrorDetails = false
 toolbarMode = "minimal"

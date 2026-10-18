@@ -4,7 +4,7 @@ This document provides a concise architectural reference for the Ripple AI/NLP R
 
 For detailed mathematical models, valuation formulas, and parameters, see [methodology.md](methodology.md).  
 For technical limitations and operational assumptions, see [limitations.md](limitations.md).  
-For the 7-slide pitch deck guide, see [presentation_outline.md](presentation_outline.md).
+For the complete slide deck guide and presentation notes, see [presentation.md](presentation.md).
 
 ---
 
@@ -33,14 +33,20 @@ For the 7-slide pitch deck guide, see [presentation_outline.md](presentation_out
    - Maps raw impact to observed absolute abnormal stock and factor moves ($|CAR_{0,1}|$) via Isotonic Regression, yielding a calibrated impact score ($1.0$ to $10.0$).
    - Persists all risk signals to SQLite (`data/signals/signals.db`) and JSONL (`data/signals/signals.jsonl`).
 
-4. **Strategic Stress Engine - Module B (`src/stress/`):**
+4. **Tactical Index Rebalancer - Module A (`src/rebalance/`):**
+   - Ingests calibrated risk signals and constituent entity mappings.
+   - Modulates weights of a 15-stock S&P 100 constituent equity index using exponential half-life decay.
+   - Strictly enforces constituent weight bounds ($w_{\min}, w_{\max}$), maximum portfolio turnover caps, and cash conservation.
+   - Maintains execution audit logs under `data/rebalance/history.jsonl`.
+
+5. **Strategic Stress Engine - Module B (`src/stress/`):**
    - Triggers when an incoming signal reaches `impact_score` >= 7.0.
    - Finds historical crisis analogs in FAISS; applies Bayesian shrinkage toward documented baseline priors when analogs < 3.
    - Propagates shocks through the NetworkX exposure graph with distance decay ($\delta = 0.5$, max 2 hops).
    - Revalues the banking book ($8.54B book: 70 loans, 60 corporate bonds, 50 OTC derivatives) across median (p50), mild (p5), and severe (p95) factor moves.
    - Logs every stress execution to `data/stress_runs/run_*.json`.
 
-5. **Delivery & Interface Layer (`src/dashboard/`, `src/api/`):**
+6. **Delivery & Interface Layer (`src/dashboard/`, `src/api/`):**
    - **Interactive Dashboard:** Streamlit + Plotly application running 100% offline with 6 institutional views (Overview, Signals, Stress test, Rebalancer, Model check, Time machine).
    - **Interactive "What-If" Stress Studio:** Live parameter override allowing risk officers to simulate custom interest rate, spread widening, oil, FX, and default intensity shocks against the $8.54B portfolio with live grouped comparison charts.
    - **1-Click Risk Committee Audit Pack (`src/dashboard/report.py`):** Standalone publication-grade HTML/PDF report generator producing certified audit packs with Basel III CET1 capital calculations, position write-downs, and print stylesheets.

@@ -4,6 +4,7 @@
 **College Email ID:** mayank.23bai10291@vitbhopal.ac.in  
 **College / Campus:** Vellore Institute of Technology Bhopal  
 **Demo Video Link:** [To be added]  
+**Presentation Deck:** [docs/presentation.md](docs/presentation.md)
 
 ---
 
@@ -11,10 +12,9 @@
 
 Financial institutions monitor continuous streams of unstructured text from news providers, regulatory bulletins, and social platforms. Identifying credit and market risk events manually is slow, prone to oversight, and detached from direct portfolio impact. Most sentiment analysis systems output generic document-level scores without mapping them to economic loss or portfolio balance sheets.
 
-Ripple solves this problem by processing raw news feeds into structured risk intelligence and running event-driven portfolio stress tests (Module B). The system performs three core tasks:
-1. Ingests and cleans unstructured financial articles from news feeds and social media.
-2. Extracts sentiment, entities, and event categories using domain NLP models, clusters related stories, and calibrates impact against historical market price moves.
-3. Automatically triggers strategic portfolio revaluations across corporate loans, bonds, and derivatives, propagating shocks through an exposure contagion graph.
+Ripple solves this problem by processing raw news feeds into structured risk intelligence and connecting them to dual portfolio management engines:
+1. **Module 1 (Module A) — Sentiment-Driven Tactical Index Rebalancer:** Dynamically tilts equity constituent weights of a 15-stock S&P 100 benchmark index based on decayed news and social sentiment signals while enforcing turnover limits and risk bounds.
+2. **Module 2 (Module B) — Strategic Event-Driven Portfolio Stress-Testing Tool:** Automatically triggers multi-asset revaluations across corporate loans, bonds, and OTC derivatives on an $8.54 Billion wholesale banking book, propagating shocks through an exposure contagion graph.
 
 The entire system runs fully offline from disk caches for repeatable evaluation, with an automated fallback mechanism when live external APIs reach rate limits or network errors.
 
@@ -28,8 +28,9 @@ The entire system runs fully offline from disk caches for repeatable evaluation,
 1. **Ingestion Layer:** Reads live or cached articles from GDELT 2.0, NewsAPI/RSS feeds, and Twitter feeds. Deduplicates text using MD5 URL hashes and title Jaccard similarity.
 2. **NLP Engine:** Classifies document sentiment using FinBERT (`ProsusAI/finbert`), maps entities (companies, sectors, countries, commodities) using keyword and rule lookups, and assigns event categories using Gemini 2.0 Flash with local rule-based fallbacks.
 3. **Clustering & Calibration:** Groups related articles across a rolling 7-day window using FAISS cosine similarity over `all-MiniLM-L6-v2` embeddings. Flags sentiment divergence between news and social feeds. Fits an isotonic regression model from raw impact to observed absolute abnormal stock and factor returns (`|CAR_{0,1}|`), producing a calibrated impact score from 1 to 10.
-4. **Stress Engine (Module B):** When a signal reaches an impact score >= 7.0, the engine retrieves historical crisis analogs, shrinks factor shocks toward documented baseline priors, and propagates intensities through a NetworkX contagion graph. It revalues loans via stressed default probabilities, bonds via duration and spread widening, and derivatives via delta/DV01 formulas.
-5. **Consumption Layer:** Serves data through a FastAPI microservice and an interactive 5-view Streamlit + Plotly dashboard.
+4. **Tactical Rebalancer (Module A):** Takes calibrated signals to compute time-decayed tactical constituent tilts, bounding maximum single-stock deviations and portfolio turnover.
+5. **Stress Engine (Module B):** When a signal reaches an impact score >= 7.0, the engine retrieves historical crisis analogs, shrinks factor shocks toward documented baseline priors, and propagates intensities through a NetworkX contagion graph. It revalues loans via stressed default probabilities, bonds via duration and spread widening, and derivatives via delta/DV01 formulas.
+6. **Consumption Layer:** Serves data through a FastAPI microservice and an interactive 6-view Streamlit + Plotly dashboard.
 
 ### Core Libraries & Technologies
 - **NLP & Embeddings:** Hugging Face Transformers (`ProsusAI/finbert`), Sentence-Transformers (`all-MiniLM-L6-v2`), FAISS-CPU (`faiss-cpu 1.13.0`), Google GenAI SDK.
