@@ -334,7 +334,7 @@ with col_brand:
         f"""
         <div style="padding-top: 4px;">
             <span style="font-size: 1.05rem; font-weight: 700; color: #2D6BFF; letter-spacing: 0.3px;">RIPPLE RISK ENGINE</span>
-            <span style="font-size: 0.82rem; color: {brand_sub}; margin-left: 8px; font-weight: 500;">S&P Global & CRISIL Assessment</span>
+            <span style="font-size: 0.82rem; color: {brand_sub}; margin-left: 8px; font-weight: 500;">S&P Global & CRISIL</span>
             <div style="font-size: 0.72rem; color: {brand_muted}; margin-top: 2px;">
                 <span style="color: #10B981; font-weight: 600;">● System Online</span> | Replay Window: 2026-09-08 to 2026-10-16 | Wholesale Book: $8.54B (42 Positions)
             </div>
@@ -376,11 +376,12 @@ with col_run:
         key="btn_run_master_pipeline",
     ):
         target_mode = "live" if is_live else "replay"
-        target_query = st.session_state.get("live_search_query", "bank OR default OR inflation")
+        raw_query = st.session_state.get("live_search_query", "Banking Credit, Debt Defaults, Inflation Shock")
+        target_query = " OR ".join([q.strip() for q in raw_query.replace(",", " OR ").split(" OR ") if q.strip()]) if target_mode == "live" else None
         with st.status(f"Executing Ripple Master Pipeline ({target_mode.upper()})...", expanded=True) as status_box:
             st.write("Step 1: Ingesting articles (GDELT 2.0, NewsAPI/RSS, Tweets)...")
             from run import run_pipeline
-            run_pipeline(mode=target_mode, query=target_query if target_mode == "live" else None, limit=60)
+            run_pipeline(mode=target_mode, query=target_query, limit=60)
             st.write("Step 2: Scored sentiment with FinBERT & categorized events.")
             st.write("Step 3: Clustered rolling-window events with FAISS.")
             st.write("Step 4: Executed Module B portfolio stress test on $8.54B book.")
@@ -403,27 +404,52 @@ if status_path.exists():
         pass
 
 if st.session_state["ingestion_mode"] == "Live Stream (API Active)":
-    with st.expander("Live API Configuration & Streaming Query", expanded=True):
-        api_c1, api_c2, api_c3 = st.columns([1.5, 1.5, 1.0])
-        with api_c1:
-            masked_news = f"{news_key[:4]}...{news_key[-4:]}" if len(news_key) > 8 else "Missing"
-            st.text(f"NewsAPI Status: {'Connected (' + masked_news + ')' if news_key else 'Key Missing'}")
-        with api_c2:
-            masked_gemini = f"{gemini_key[:4]}...{gemini_key[-4:]}" if len(gemini_key) > 8 else "Missing"
-            st.text(f"Gemini API Status: {'Connected (' + masked_gemini + ')' if gemini_key else 'Key Missing'}")
-        with api_c3:
-            st.text("Fallback Policy: Active")
+    masked_news = f"{news_key[:4]}...{news_key[-4:]}" if len(news_key) > 8 else "Missing"
+    masked_gemini = f"{gemini_key[:4]}...{gemini_key[-4:]}" if len(gemini_key) > 8 else "Missing"
 
+    border_acc = "#2D6BFF" if is_dark else "#1D4ED8"
+    box_bg = "#0E1A2E" if is_dark else "#FFFFFF"
+    box_sub = "#CBD5E1" if is_dark else "#475569"
+    box_title = "#F8FAFC" if is_dark else "#0F172A"
+
+    render_html(
+        f"""
+        <div style="background-color: {box_bg}; border: 1px solid {'#1E355B' if is_dark else '#CBD5E1'}; border-left: 3px solid {border_acc}; border-radius: 4px; padding: 0.85rem 1.1rem; margin-top: 4px; margin-bottom: 0.75rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;">
+                <div>
+                    <span style="font-size: 0.92rem; font-weight: 600; color: {box_title};">Live Financial Feed Streaming Active</span>
+                    <span style="font-size: 0.76rem; color: {box_sub}; margin-left: 8px;">Connected to GDELT 2.0 & NewsAPI Live Endpoints</span>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center;">
+                    <span class="chip {'chip-gain' if news_key else 'chip-neutral'}">NewsAPI: {'Connected (' + masked_news + ')' if news_key else 'RSS Fallback'}</span>
+                    <span class="chip {'chip-gain' if gemini_key else 'chip-neutral'}">Gemini: {'Connected' if gemini_key else 'Local Fallback'}</span>
+                    <span class="chip chip-gain">System Fallback: Active</span>
+                </div>
+            </div>
+            <div style="font-size: 0.76rem; color: {box_sub};">
+                Search terms filter live incoming articles across global financial news sources. Click <strong>[ Execute Live Sync ]</strong> in the top bar to ingest and revalue.
+            </div>
+        </div>
+        """
+    )
+
+    q_col1, q_col2 = st.columns([4.0, 1.0], gap="small")
+    with q_col1:
         st.session_state["live_search_query"] = st.text_input(
-            "Live Search Query for Feeds",
-            value="bank OR default OR inflation",
-            help="Filter search query passed to GDELT and NewsAPI live query endpoints.",
+            "Live Feed Topic Filter (Keywords)",
+            value=st.session_state.get("live_search_query", "Banking Credit, Debt Defaults, Inflation Shock"),
+            help="Filter keywords passed to live GDELT 2.0 and NewsAPI streaming endpoints.",
+            key="input_live_search_query",
         )
+    with q_col2:
+        render_html("<div style='height: 25px;'></div>")
+        if st.button("Reset Filter", use_container_width=True, help="Reset to default credit & inflation search terms"):
+            st.session_state["live_search_query"] = "Banking Credit, Debt Defaults, Inflation Shock"
+            st.session_state["input_live_search_query"] = "Banking Credit, Debt Defaults, Inflation Shock"
+            st.rerun()
 
-        if status_banner:
-            st.warning(f"Ingestion Fallback Notification: {status_banner}")
-        else:
-            st.info("Live streaming active. Clicking 'Run Live Sync' will ingest the latest financial articles and update all risk analytics in real-time.")
+    if status_banner:
+        st.warning(f"Ingestion Notification: {status_banner}")
 
 # Main Navigation Tabs (Bound to session_state with key="active_nav")
 nav_page = st.radio(

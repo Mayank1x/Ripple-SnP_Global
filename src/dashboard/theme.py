@@ -475,28 +475,133 @@ div[data-testid="stDataFrame"], [class*="gdg"] {{
     --gdg-accent-color: {ACCENT_BLUE} !important;
 }}
 
-/* Inputs & Selectboxes */
-div[data-testid="stTextInput"] input, div[data-testid="stSelectbox"] div[data-baseweb="select"] {{
-    background-color: {c_surface} !important;
+/* Global Widget Labels & Typography Contrast */
+div[data-testid="stWidgetLabel"] label,
+div[data-testid="stWidgetLabel"] p,
+div[data-testid="stWidgetLabel"] span,
+label[data-testid="stWidgetLabel"] {{
     color: {c_text_primary} !important;
-    border-color: {c_border_strong} !important;
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
 }}
 
-/* Captions */
-div[data-testid="stCaptionContainer"] p {{
+/* All Markdown & Text Elements */
+div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stMarkdownContainer"] span,
+div[data-testid="stMarkdownContainer"] li {{
+    color: {c_text_primary} !important;
+}}
+div[data-testid="stText"],
+div[data-testid="stText"] pre,
+div[data-testid="stText"] p,
+pre, code {{
+    background-color: {c_surface_subtle} !important;
+    color: {c_text_primary} !important;
+    font-family: 'IBM Plex Sans', monospace !important;
+    border: 1px solid {c_border_subtle} !important;
+    border-radius: 4px !important;
+}}
+
+/* Text Inputs, Textareas & Selectboxes */
+div[data-testid="stTextInput"] input,
+div[data-baseweb="input"] input,
+div[data-baseweb="base-input"] input {{
+    background-color: {c_surface} !important;
+    color: {c_text_primary} !important;
+    border: 1px solid {c_border_strong} !important;
+    border-radius: 4px !important;
+    font-size: 0.88rem !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    padding: 0.45rem 0.65rem !important;
+}}
+div[data-testid="stTextInput"] input:focus,
+div[data-baseweb="input"]:focus-within {{
+    border-color: {ACCENT_BLUE} !important;
+    box-shadow: 0 0 0 1px {ACCENT_BLUE} !important;
+}}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] {{
+    background-color: {c_surface} !important;
+    color: {c_text_primary} !important;
+    border: 1px solid {c_border_strong} !important;
+    border-radius: 4px !important;
+}}
+div[data-testid="stSelectbox"] div[data-baseweb="select"] * {{
+    color: {c_text_primary} !important;
+}}
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[data-testid="stSelectboxMenu"] {{
+    background-color: {c_surface} !important;
+    border: 1px solid {c_border_strong} !important;
+}}
+ul[data-testid="stSelectboxMenu"] li {{
+    background-color: {c_surface} !important;
+    color: {c_text_primary} !important;
+}}
+ul[data-testid="stSelectboxMenu"] li:hover {{
+    background-color: {c_surface_subtle} !important;
+    color: {ACCENT_BLUE} !important;
+}}
+
+/* Checkboxes & Toggles */
+div[data-testid="stCheckbox"] label p,
+div[data-testid="stCheckbox"] label span,
+div[data-baseweb="checkbox"] span {{
+    color: {c_text_primary} !important;
+    font-size: 0.84rem !important;
+}}
+
+/* Captions & Secondary Text */
+div[data-testid="stCaptionContainer"] p,
+.stCaption, small {{
     color: {c_text_secondary} !important;
     font-size: 0.78rem !important;
     line-height: 1.45 !important;
 }}
 
-/* Expanders */
-div[data-testid="stExpander"] {{
+/* Expanders (Strictly No White Boxes in Dark Mode) */
+div[data-testid="stExpander"],
+details[data-testid="stExpander"] {{
     background-color: {c_surface} !important;
     border: 1px solid {c_border_subtle} !important;
     border-radius: 4px !important;
     margin-bottom: 0.6rem !important;
 }}
-div[data-testid="stExpander"] summary span {{
+div[data-testid="stExpander"] summary,
+details[data-testid="stExpander"] summary {{
+    background-color: {c_surface_subtle} !important;
+    color: {c_text_primary} !important;
+    border-radius: 4px !important;
+    border: none !important;
+}}
+div[data-testid="stExpander"] summary:hover,
+details[data-testid="stExpander"] summary:hover {{
+    background-color: {c_surface} !important;
+    color: {ACCENT_BLUE} !important;
+}}
+div[data-testid="stExpander"] summary p,
+div[data-testid="stExpander"] summary span,
+details[data-testid="stExpander"] summary p,
+details[data-testid="stExpander"] summary span {{
+    color: {c_text_primary} !important;
+    font-weight: 600 !important;
+}}
+div[data-testid="stExpander"] div[data-testid="stExpanderDetails"],
+details[data-testid="stExpander"] > div:last-child {{
+    background-color: {c_surface} !important;
+    color: {c_text_primary} !important;
+}}
+
+/* Alerts & Notifications */
+div[data-testid="stAlert"] {{
+    background-color: {c_surface_subtle} !important;
+    border: 1px solid {c_border_subtle} !important;
+    border-radius: 4px !important;
+}}
+div[data-testid="stAlert"] p,
+div[data-testid="stAlert"] span,
+div[data-testid="stAlert"] div {{
     color: {c_text_primary} !important;
 }}
 
