@@ -96,14 +96,28 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
+PAGE_OPTIONS = [
+    "Overview",
+    "Signals",
+    "Stress test",
+    "Rebalancer",
+    "Model check",
+    "Time machine",
+]
+
 if "theme_mode" not in st.session_state:
     st.session_state["theme_mode"] = "Dark"
 
 if "ingestion_mode" not in st.session_state:
     st.session_state["ingestion_mode"] = "Offline Replay (Cached)"
 
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = "Overview"
+
 if "active_nav" not in st.session_state:
-    st.session_state["active_nav"] = "Overview"
+    st.session_state["active_nav"] = st.session_state["current_page"]
+else:
+    st.session_state["current_page"] = st.session_state["active_nav"]
 
 is_dark = st.session_state["theme_mode"] == "Dark"
 inject_theme(dark_mode=is_dark)
@@ -362,6 +376,8 @@ with col_theme:
     )
     if theme_selection != st.session_state["theme_mode"]:
         st.session_state["theme_mode"] = theme_selection
+        # Preserve active page into both state variables so rerun does not reset to Overview
+        st.session_state["active_nav"] = st.session_state.get("current_page", "Overview")
         st.rerun()
 
 with col_run:
@@ -452,20 +468,20 @@ if st.session_state["ingestion_mode"] == "Live Stream (API Active)":
         st.warning(f"Ingestion Notification: {status_banner}")
 
 # Main Navigation Tabs (Bound to session_state with key="active_nav")
+saved_page = st.session_state.get("current_page", st.session_state.get("active_nav", "Overview"))
+if saved_page not in PAGE_OPTIONS:
+    saved_page = "Overview"
+page_idx = PAGE_OPTIONS.index(saved_page)
+
 nav_page = st.radio(
     "Navigation Menu",
-    [
-        "Overview",
-        "Signals",
-        "Stress test",
-        "Rebalancer",
-        "Model check",
-        "Time machine",
-    ],
+    PAGE_OPTIONS,
+    index=page_idx,
     key="active_nav",
     horizontal=True,
     label_visibility="collapsed",
 )
+st.session_state["current_page"] = nav_page
 
 render_html("<div style='height: 4px;'></div>")
 
