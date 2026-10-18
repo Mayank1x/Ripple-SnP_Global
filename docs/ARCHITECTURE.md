@@ -41,5 +41,7 @@ For the 7-slide pitch deck guide, see [presentation_outline.md](presentation_out
    - Logs every stress execution to `data/stress_runs/run_*.json`.
 
 5. **Delivery & Interface Layer (`src/dashboard/`, `src/api/`):**
-   - **Interactive Dashboard:** Streamlit + Plotly application running 100% offline with 5 dedicated views (Live Signals, Stress Test, Contagion Map, Model Check, Time Machine Replay).
+   - **Interactive Dashboard:** Streamlit + Plotly application running 100% offline with 6 institutional views (Overview, Signals, Stress test, Rebalancer, Model check, Time machine).
+   - **Interactive "What-If" Stress Studio:** Live parameter override allowing risk officers to simulate custom interest rate, spread widening, oil, FX, and default intensity shocks against the $8.54B portfolio with live grouped comparison charts.
+   - **1-Click Risk Committee Audit Pack (`src/dashboard/report.py`):** Standalone publication-grade HTML/PDF report generator producing certified audit packs with Basel III CET1 capital calculations, position write-downs, and print stylesheets.
    - **REST API:** FastAPI microservice providing `/signals`, `/signals/{id}`, and `/health` endpoints.

@@ -298,6 +298,46 @@ def build_loss_waterfall(loss_by_class: dict[str, float], dark_mode: bool = True
     return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
 
 
+def build_scenario_comparison_chart(
+    base_loss_by_class: dict[str, float],
+    custom_loss_by_class: dict[str, float],
+    dark_mode: bool = True,
+) -> go.Figure:
+    """Compare baseline stress loss vs custom what-if scenario loss by asset class."""
+    classes = sorted(list(set(base_loss_by_class.keys()).union(set(custom_loss_by_class.keys()))))
+    base_vals = [base_loss_by_class.get(c, 0.0) / 1e6 for c in classes]
+    custom_vals = [custom_loss_by_class.get(c, 0.0) / 1e6 for c in classes]
+
+    fig = go.Figure()
+    fig.add_trace(
+        go.Bar(
+            name="Baseline Event",
+            x=classes,
+            y=base_vals,
+            marker_color="#64748B" if dark_mode else "#94A3B8",
+            text=[f"${v:.1f}M" for v in base_vals],
+            textposition="outside",
+        )
+    )
+    fig.add_trace(
+        go.Bar(
+            name="What-If Scenario",
+            x=classes,
+            y=custom_vals,
+            marker_color="#EF4444" if dark_mode else "#DC2626",
+            text=[f"${v:.1f}M" for v in custom_vals],
+            textposition="outside",
+        )
+    )
+    fig.update_layout(
+        barmode="group",
+        yaxis_title="Write-Down ($ Millions)",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+    )
+    fig.update_yaxes(ticksuffix="M", tickprefix="$")
+    return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
+
+
 def build_sector_country_heatmap(dark_mode: bool = True) -> go.Figure:
     """Build a sector by country loss percentage heatmap."""
     sectors = ["Technology", "Financial Services", "Energy & Utilities", "Consumer Discretionary", "Industrials"]

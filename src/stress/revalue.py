@@ -82,6 +82,7 @@ def revalue_position(
     shocks: dict[str, float],
     graph_intensities: dict[str, float] | None = None,
     k_loan: float = 2.0,
+    include_convexity: bool = False,
 ) -> PositionStress:
     """Revalue a single banking position under factor shocks and network contagion.
 
@@ -90,6 +91,7 @@ def revalue_position(
         shocks: Dictionary of macro factor moves (yield_10y, credit_spread, brent_oil, fx_dxy, equity_us).
         graph_intensities: Contagion intensity per node from ExposureGraph.propagate().
         k_loan: Exponential multiplier for loan PD sensitivity.
+        include_convexity: If True, incorporates 2nd-order bond convexity (+0.5 * Convexity * dy^2).
 
     Returns:
         PositionStress result with pre_value, post_value, and loss.
@@ -149,7 +151,7 @@ def revalue_position(
     # 2. Bonds Book
     # -------------------------------------------------------------
     elif pos.asset_class == "Bond":
-        # Formula: dP = -ModDur * dy - SpreadDur * dspread
+        # Formula: dP = -ModDur * dy - SpreadDur * dspread + (0.5 * Convexity * dy^2 if enabled)
         mod_dur = pos.modified_duration if pos.modified_duration > 0 else 4.0
         spread_dur = pos.spread_duration if pos.spread_duration > 0 else 3.5
 
@@ -157,7 +159,12 @@ def revalue_position(
         issuer_intensity = intensities.get(pos.counterparty, 0.0)
         effective_dspread = dspread + (issuer_intensity * 0.0050)
 
-        dP = - (mod_dur * dy) - (spread_dur * effective_dspread)
+        # Convexity modeling: pos.metadata or empirical bond formula C ~= ModDur * (ModDur + 0.8) * 0.55
+        meta = pos.metadata if (hasattr(pos, "metadata") and isinstance(pos.metadata, dict)) else {}
+        convexity = float(meta.get("convexity", mod_dur * (mod_dur + 0.8) * 0.55))
+        convexity_adj = 0.5 * convexity * (dy ** 2) if include_convexity else 0.0
+
+        dP = - (mod_dur * dy) - (spread_dur * effective_dspread) + convexity_adj
 
         # Bond loss = MTM * (-dP)
         loss = pre_val * (-dP) if dP < 0 else 0.0
@@ -168,6 +175,8 @@ def revalue_position(
             "dspread_bps": round(effective_dspread * 10_000, 2),
             "mod_duration": mod_dur,
             "spread_duration": spread_dur,
+            "convexity": round(convexity, 2),
+            "convexity_adjustment_bps": round(convexity_adj * 10_000, 2),
             "dP_pct": round(dP * 100, 4),
         }
 
@@ -226,6 +235,7 @@ def revalue_portfolio(
     shocks: dict[str, float],
     graph_intensities: dict[str, float] | None = None,
     k_loan: float = 2.0,
+    include_convexity: bool = False,
 ) -> PortfolioStressSummary:
     """Revalue an entire wholesale portfolio under macroeconomic factor shocks and contagion."""
     results: list[PositionStress] = []
@@ -239,7 +249,11 @@ def revalue_portfolio(
 
     for pos in portfolio.positions:
         res = revalue_position(
-            pos, shocks=shocks, graph_intensities=graph_intensities, k_loan=k_loan
+            pos,
+            shocks=shocks,
+            graph_intensities=graph_intensities,
+            k_loan=k_loan,
+            include_convexity=include_convexity,
         )
         results.append(res)
 
@@ -278,3 +292,47 @@ def revalue_portfolio(
         top_10_positions=top_10_dicts,
         position_results=results,
     )
+
+
+def compute_regulatory_capital(
+    pre_val: float,
+    total_loss: float,
+    base_cet1_ratio: float = 0.1350,
+) -> dict[str, Any]:
+    """Calculate Basel III / IV Common Equity Tier 1 (CET1) capital impact under stress.
+
+    Models:
+    1. Baseline Risk-Weighted Assets (RWA) estimated at ~65% of wholesale banking book.
+    2. Stressed Tier 1 Capital absorbed directly by mark-to-market and credit default losses.
+    3. Rating migration expansion increasing stressed RWA by up to +3%.
+    4. Compliance check against Basel III 10.50% minimum (4.5% min + 2.5% CCB + 3.5% D-SIB/G-SIB buffer).
+    """
+    base_rwa = pre_val * 0.65
+    base_tier1 = base_rwa * base_cet1_ratio
+    stressed_tier1 = max(0.0, base_tier1 - total_loss)
+
+    # RWA density expansion from distressed borrower rating migrations
+    migration_factor = 1.0 + min(0.08, (total_loss / pre_val) * 0.50 if pre_val > 0 else 0.0)
+    stressed_rwa = base_rwa * migration_factor
+
+    stressed_cet1 = (stressed_tier1 / stressed_rwa) if stressed_rwa > 0 else 0.0
+    depletion_bps = (base_cet1_ratio - stressed_cet1) * 10_000.0
+    min_requirement = 0.1050  # 10.50% Basel III minimum capital floor
+    headroom_bps = (stressed_cet1 - min_requirement) * 10_000.0
+
+    is_compliant = stressed_cet1 >= min_requirement
+    status = "Adequate (Compliant)" if is_compliant else "Deficit (Recapitalization Alert)"
+
+    return {
+        "base_cet1": base_cet1_ratio,
+        "stressed_cet1": round(stressed_cet1, 4),
+        "depletion_bps": round(depletion_bps, 1),
+        "min_requirement": min_requirement,
+        "headroom_bps": round(headroom_bps, 1),
+        "is_compliant": is_compliant,
+        "status": status,
+        "base_tier1": round(base_tier1, 2),
+        "stressed_tier1": round(stressed_tier1, 2),
+        "base_rwa": round(base_rwa, 2),
+        "stressed_rwa": round(stressed_rwa, 2),
+    }

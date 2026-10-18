@@ -22,6 +22,7 @@ from __future__ import annotations
 import json
 import os
 import sys
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -46,6 +47,7 @@ from src.dashboard.components import (
     build_loss_waterfall,
     build_rebalance_area_chart,
     build_rebalance_comparison_chart,
+    build_scenario_comparison_chart,
     build_sector_country_heatmap,
     build_time_machine_chart,
     format_bps,
@@ -54,6 +56,8 @@ from src.dashboard.components import (
     render_section_title,
     render_transmission_pipeline,
 )
+from src.dashboard.report import generate_audit_pack_html
+from src.stress.revalue import compute_regulatory_capital, revalue_portfolio
 from src.dashboard.theme import (
     ACCENT_BLUE,
     BORDER_STRONG,
@@ -787,11 +791,49 @@ elif nav_page == "Stress test":
     p5_loss = float(band.get("p5_loss", 146369947.55))
     p95_loss = float(band.get("p95_loss", 172195911.10))
 
+    # Basel III Regulatory Capital Baseline
+    reg_cap = compute_regulatory_capital(pre_val, loss_p50)
+
+    # 1. Action & Export Bar (Feature 5)
+    export_c1, export_c2 = st.columns([1.5, 1.0])
+    with export_c1:
+        run_label = stress_run.get("run_id", "stress_run")
+        sig_evt = stress_run.get("signal_summary", {})
+        evt_type_lbl = sig_evt.get("event_type", "Credit Shock")
+        render_html(
+            f"""
+            <div style="font-size: 0.82rem; padding: 0.4rem 0.6rem; background: {'#14243D' if is_dark else '#F8FAFC'}; border: 1px solid {'#1E355B' if is_dark else '#CBD5E1'}; border-radius: 4px; display: inline-flex; align-items: center; gap: 8px;">
+                <span style="font-weight: 600; color: {'#F8FAFC' if is_dark else '#0F172A'};">Active Run:</span>
+                <span class="chip chip-neutral">{run_label}</span>
+                <span class="chip chip-loss">{evt_type_lbl}</span>
+                <span style="color: {'#94A3B8' if is_dark else '#64748B'}; font-size: 0.75rem;">Wholesale Book: $8.54B</span>
+            </div>
+            """
+        )
+    with export_c2:
+        audit_html = generate_audit_pack_html(stress_run, is_custom=False)
+        st.download_button(
+            label="Download Risk Committee Audit Pack (HTML/PDF)",
+            data=audit_html,
+            file_name=f"Ripple_Risk_Audit_Pack_{run_label}.html",
+            mime="text/html",
+            key="dl_main_audit_pack",
+            use_container_width=True,
+        )
+
+    render_html("<div style='height: 6px;'></div>")
+
+    # 2. Institutional KPI Grid with Basel III CET1 Capital
     kpi1, kpi2, kpi3, kpi4 = st.columns(4)
     kpi1.metric("Pre-Stress Book Value", format_currency(pre_val, decimals=2))
     kpi2.metric("Post-Stress Book Value", format_currency(post_p50, decimals=2))
     kpi3.metric("Expected Loss (p50)", f"-{format_currency(loss_p50, decimals=1)}", delta=f"-{loss_pct*100:.2f}%", delta_color="inverse")
-    kpi4.metric("Loss Range (p5 to p95)", f"-{format_currency(p5_loss, decimals=0)} to -{format_currency(p95_loss, decimals=0)}")
+    kpi4.metric(
+        "Basel III CET1 Capital",
+        f"{reg_cap['stressed_cet1']*100:.2f}%",
+        delta=f"-{reg_cap['depletion_bps']:.0f} bps ({reg_cap['status']})",
+        delta_color="inverse" if not reg_cap["is_compliant"] else "off",
+    )
 
     render_html("<div style='height: 8px;'></div>")
 
@@ -871,6 +913,279 @@ elif nav_page == "Stress test":
         ]
         st.dataframe(pd.DataFrame(analogs), use_container_width=True, hide_index=True)
         st.caption("Historical analog matching computes Euclidean distance on macro shock vectors with shrinkage weight 0.33 applied to constrain tail bias.")
+
+    # =====================================================================
+    # Feature 2: Interactive "What-If" Stress Scenario Studio
+    # =====================================================================
+    render_html("<div style='height: 16px;'></div>")
+    render_section_title(
+        "Interactive 'What-If' Stress Scenario Studio (Live Simulation)",
+        "Override baseline crisis parameters: simulate custom interest rate shocks, spread widening, oil spikes, and loan default sensitivity.",
+    )
+
+    # Preset Quick-Picks
+    st.markdown("**Preset Stress Scenarios:**")
+    scen_col1, scen_col2, scen_col3, scen_col4, scen_col5 = st.columns(5)
+
+    default_dy = 25
+    default_dspread = 45
+    default_oil = 5.0
+    default_fx = 1.0
+    default_k = 2.0
+
+    raw_factors = stress_run.get("shocks", {}).get("factors", {}) if isinstance(stress_run.get("shocks"), dict) else {}
+    if "yield_10y" in raw_factors:
+        default_dy = int(round(raw_factors["yield_10y"].get("p50", 0.0025) * 10000))
+    if "credit_spread" in raw_factors:
+        default_dspread = int(round(raw_factors["credit_spread"].get("p50", 0.0045) * 10000))
+    if "brent_oil" in raw_factors:
+        default_oil = float(round(raw_factors["brent_oil"].get("p50", 0.05) * 100, 1))
+
+    if "whatif_dy" not in st.session_state:
+        st.session_state["whatif_dy"] = default_dy
+    if "whatif_dspread" not in st.session_state:
+        st.session_state["whatif_dspread"] = default_dspread
+    if "whatif_oil" not in st.session_state:
+        st.session_state["whatif_oil"] = default_oil
+    if "whatif_fx" not in st.session_state:
+        st.session_state["whatif_fx"] = default_fx
+    if "whatif_k" not in st.session_state:
+        st.session_state["whatif_k"] = default_k
+
+    if scen_col1.button("Default Event Shock", use_container_width=True):
+        st.session_state["whatif_dy"] = default_dy
+        st.session_state["whatif_dspread"] = default_dspread
+        st.session_state["whatif_oil"] = default_oil
+        st.session_state["whatif_fx"] = default_fx
+        st.session_state["whatif_k"] = 2.0
+        st.rerun()
+
+    if scen_col2.button("Rate Spike (+150 bps)", use_container_width=True):
+        st.session_state["whatif_dy"] = 150
+        st.session_state["whatif_dspread"] = 40
+        st.session_state["whatif_oil"] = -5.0
+        st.session_state["whatif_fx"] = 2.5
+        st.session_state["whatif_k"] = 2.2
+        st.rerun()
+
+    if scen_col3.button("Credit Crisis (+120 bps)", use_container_width=True):
+        st.session_state["whatif_dy"] = -15
+        st.session_state["whatif_dspread"] = 120
+        st.session_state["whatif_oil"] = -12.0
+        st.session_state["whatif_fx"] = 2.0
+        st.session_state["whatif_k"] = 3.0
+        st.rerun()
+
+    if scen_col4.button("Oil Shock (+35%)", use_container_width=True):
+        st.session_state["whatif_dy"] = 40
+        st.session_state["whatif_dspread"] = 55
+        st.session_state["whatif_oil"] = 35.0
+        st.session_state["whatif_fx"] = 1.5
+        st.session_state["whatif_k"] = 2.5
+        st.rerun()
+
+    if scen_col5.button("Stagflation Shock", use_container_width=True):
+        st.session_state["whatif_dy"] = 120
+        st.session_state["whatif_dspread"] = 90
+        st.session_state["whatif_oil"] = 25.0
+        st.session_state["whatif_fx"] = 3.0
+        st.session_state["whatif_k"] = 3.2
+        st.rerun()
+
+    # Sliders
+    render_html("<div style='height: 4px;'></div>")
+    sl_col1, sl_col2 = st.columns(2, gap="medium")
+
+    with sl_col1:
+        slider_dy = st.slider(
+            "10Y Benchmark Yield Shift (basis points)",
+            min_value=-150,
+            max_value=350,
+            value=st.session_state["whatif_dy"],
+            step=5,
+            key="slider_dy",
+            help="Modulates interest rate sensitivity across bonds and IRS derivatives.",
+        )
+        slider_dspread = st.slider(
+            "Corporate Credit Spread Widening (basis points)",
+            min_value=0,
+            max_value=300,
+            value=st.session_state["whatif_dspread"],
+            step=5,
+            key="slider_dspread",
+            help="Widening spreads inflict bond price drops and elevate corporate loan default intensity.",
+        )
+        slider_oil = st.slider(
+            "Brent Crude Oil Price Move (%)",
+            min_value=-30.0,
+            max_value=60.0,
+            value=float(st.session_state["whatif_oil"]),
+            step=1.0,
+            key="slider_oil",
+            help="Oil price shocks compress operating margins in Industrials, Automotive, and Materials.",
+        )
+
+    with sl_col2:
+        slider_fx = st.slider(
+            "US Dollar (DXY) Foreign Exchange Shift (%)",
+            min_value=-10.0,
+            max_value=15.0,
+            value=float(st.session_state["whatif_fx"]),
+            step=0.5,
+            key="slider_fx",
+            help="Move in USD exchange rate applied directly to OTC FX forwards notional.",
+        )
+        slider_k = st.slider(
+            "Loan Default Intensity Multiplier (k_loan)",
+            min_value=0.5,
+            max_value=5.0,
+            value=float(st.session_state["whatif_k"]),
+            step=0.1,
+            key="slider_k",
+            help="Exponential hazard rate parameter: stressed_PD = min(1.0, PD * exp(k * intensity)).",
+        )
+        convexity_on = st.toggle(
+            "Include 2nd-Order Bond Convexity Adjustment (+0.5 * Convexity * dy^2)",
+            value=True,
+            help="Removes duration linearity limitation: provides exact bond curvature pricing during large yield shifts.",
+        )
+
+    # Execute What-If Revaluation Live (in ~2 milliseconds)
+    whatif_shocks_dict = {
+        "yield_10y": slider_dy / 10000.0,
+        "credit_spread": slider_dspread / 10000.0,
+        "brent_oil": slider_oil / 100.0,
+        "fx_dxy": slider_fx / 100.0,
+        "equity_us": -0.02,
+    }
+
+    whatif_res = revalue_portfolio(
+        portfolio=portfolio,
+        shocks=whatif_shocks_dict,
+        graph_intensities=shock_nodes,
+        k_loan=slider_k,
+        include_convexity=convexity_on,
+    )
+
+    whatif_cap = compute_regulatory_capital(whatif_res.pre_value, whatif_res.total_loss)
+
+    # Delta vs Baseline Loss
+    delta_loss = whatif_res.total_loss - loss_p50
+    delta_loss_str = f"+${delta_loss/1e6:.1f}M higher" if delta_loss > 0 else f"-${abs(delta_loss)/1e6:.1f}M lower"
+
+    render_html("<div style='height: 8px;'></div>")
+
+    # Live Scenario Outcome Metrics
+    w_m1, w_m2, w_m3, w_m4 = st.columns(4)
+    w_m1.metric("Live Stressed Book Value", format_currency(whatif_res.post_value, decimals=2))
+    w_m2.metric(
+        "Live What-If Loss",
+        f"-{format_currency(whatif_res.total_loss, decimals=1)}",
+        delta=f"-{whatif_res.loss_pct*100:.2f}% ({delta_loss_str} vs Base)",
+        delta_color="inverse",
+    )
+    w_m3.metric(
+        "Stressed CET1 Capital",
+        f"{whatif_cap['stressed_cet1']*100:.2f}%",
+        delta=f"-{whatif_cap['depletion_bps']:.0f} bps",
+        delta_color="inverse" if not whatif_cap["is_compliant"] else "off",
+    )
+    w_m4.metric(
+        "Basel III Capital Headroom",
+        f"+{whatif_cap['headroom_bps']:.0f} bps",
+        delta=whatif_cap["status"],
+        delta_color="normal" if whatif_cap["is_compliant"] else "inverse",
+    )
+
+    render_html("<div style='height: 8px;'></div>")
+
+    # Side-by-Side Charts: Comparison vs Baseline & Top 5 Positions
+    w_row_left, w_row_right = st.columns([1, 1], gap="medium")
+
+    with w_row_left:
+        render_html(
+            """
+            <div class="white-card">
+                <div class="card-title">
+                    <span>Baseline Event vs Customized What-If Write-Downs</span>
+                </div>
+            </div>
+            """
+        )
+        comp_chart = build_scenario_comparison_chart(
+            base_loss_by_class=loss_by_class,
+            custom_loss_by_class=whatif_res.loss_by_asset_class,
+            dark_mode=is_dark,
+        )
+        st.plotly_chart(comp_chart, use_container_width=True, config={"displayModeBar": False})
+
+    with w_row_right:
+        render_html(
+            """
+            <div class="white-card">
+                <div class="card-title">
+                    <span>Largest Counterparty Losses Under This Scenario</span>
+                </div>
+            </div>
+            """
+        )
+        top_w_pos = whatif_res.top_10_positions[:5]
+        if top_w_pos:
+            w_rows = []
+            for p in top_w_pos:
+                w_rows.append({
+                    "Counterparty": p.get("counterparty", p.get("position_id")),
+                    "Asset Class": p.get("asset_class"),
+                    "Sector": p.get("sector"),
+                    "Pre-Stress Value": format_currency(p.get("pre_value", 0), decimals=1),
+                    "Scenario Loss": f"-{format_currency(p.get('loss', 0), decimals=1)}",
+                    "Write-Down (%)": f"-{p.get('loss_pct', 0)*100:.2f}%",
+                })
+            st.dataframe(pd.DataFrame(w_rows), use_container_width=True, hide_index=True)
+
+    # Download customized scenario audit pack
+    custom_run_payload = {
+        "run_id": f"whatif_{slider_dy}bp_{slider_dspread}bp",
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "portfolio_value_before": whatif_res.pre_value,
+        "portfolio_value_after_p50": whatif_res.post_value,
+        "loss_p50": whatif_res.total_loss,
+        "loss_pct_p50": whatif_res.loss_pct,
+        "band": {
+            "p5_loss": whatif_res.total_loss * 0.90,
+            "p95_loss": whatif_res.total_loss * 1.10,
+        },
+        "signal_summary": {
+            "event_id": "whatif_custom",
+            "title": f"Custom Simulation: Rates {slider_dy:+d}bps, Spread {slider_dspread:+d}bps, Oil {slider_oil:+.1f}%",
+            "event_type": "Interactive Simulation",
+            "impact_score": round(min(10.0, max(1.0, 5.0 + (abs(slider_dy)/100.0) + (slider_dspread/100.0))), 1),
+            "sentiment_score": -0.75,
+            "confidence": 0.95,
+        },
+        "loss_by_asset_class": whatif_res.loss_by_asset_class,
+        "loss_by_sector": whatif_res.loss_by_sector,
+        "loss_by_country": whatif_res.loss_by_country,
+        "top_10_positions": whatif_res.top_10_positions,
+        "graph_shock_nodes": shock_nodes,
+    }
+
+    custom_audit_html = generate_audit_pack_html(
+        stress_run=custom_run_payload,
+        custom_shocks=whatif_shocks_dict,
+        is_custom=True,
+        k_loan=slider_k,
+        include_convexity=convexity_on,
+    )
+
+    st.download_button(
+        label="Download Customized Scenario Audit Pack (HTML/PDF)",
+        data=custom_audit_html,
+        file_name=f"Ripple_WhatIf_Audit_Pack_{custom_run_payload['run_id']}.html",
+        mime="text/html",
+        key="dl_custom_scenario_audit",
+        use_container_width=True,
+    )
 
 
 # =====================================================================

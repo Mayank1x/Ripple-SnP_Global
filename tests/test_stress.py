@@ -51,6 +51,38 @@ def test_rates_up_lowers_bond_value():
     assert res_up.post_value == pytest.approx(9_750_000.0, rel=1e-3)
 
 
+def test_bond_convexity_reduces_loss_on_large_rate_hike():
+    """Verify that 2nd-order bond convexity (+0.5 * C * dy^2) provides positive curvature benefit."""
+    bond = Position(
+        position_id="BOND_CONVEX_TEST",
+        asset_class="Bond",
+        instrument_type="Corporate Bond",
+        counterparty="Apex Global Corp",
+        sector="Industrials",
+        country="United States",
+        rating="BBB",
+        notional=10_000_000.0,
+        price=100.0,
+        modified_duration=6.0,
+        spread_duration=4.0,
+        is_synthetic=True,
+    )
+
+    # Large rate shock: +200 bps (+0.0200)
+    shocks_large = {"yield_10y": 0.0200, "credit_spread": 0.0}
+
+    # Linear only
+    res_linear = revalue_position(bond, shocks=shocks_large, include_convexity=False)
+    # With 2nd order convexity
+    res_convex = revalue_position(bond, shocks=shocks_large, include_convexity=True)
+
+    # Convexity dampens bond price drop under large upward rate hikes
+    assert res_convex.loss < res_linear.loss
+    assert res_convex.post_value > res_linear.post_value
+    assert "convexity" in res_convex.details
+    assert res_convex.details["convexity_adjustment_bps"] > 0.0
+
+
 def test_oil_up_hurts_the_right_sectors():
     """Verify that an oil price surge (+10% Brent) inflicts losses on energy-consuming sectors."""
     loan_industrials = Position(

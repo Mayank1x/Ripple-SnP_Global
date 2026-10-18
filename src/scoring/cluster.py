@@ -16,7 +16,10 @@ import hashlib
 from datetime import datetime, timezone
 from typing import Any
 
+import os
 import numpy as np
+
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 
 from src.ingest.helpers import load_config
 from src.nlp.schema import AnalysedDoc
@@ -30,6 +33,7 @@ def _get_embed_model():
     """Lazily load sentence-transformers model."""
     global _EMBED_MODEL
     if _EMBED_MODEL is None:
+        os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
         from sentence_transformers import SentenceTransformer
 
         cfg = load_config()
