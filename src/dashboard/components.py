@@ -270,6 +270,7 @@ def render_transmission_pipeline(
 # Stress Test Visualizations (Module B)
 # =====================================================================
 
+@st.cache_data(show_spinner=False)
 def build_loss_waterfall(loss_by_class: dict[str, float], dark_mode: bool = True) -> go.Figure:
     """Build a loss waterfall chart by asset class."""
     classes = list(loss_by_class.keys())
@@ -298,6 +299,7 @@ def build_loss_waterfall(loss_by_class: dict[str, float], dark_mode: bool = True
     return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
 
 
+@st.cache_data(show_spinner=False)
 def build_scenario_comparison_chart(
     base_loss_by_class: dict[str, float],
     custom_loss_by_class: dict[str, float],
@@ -338,6 +340,7 @@ def build_scenario_comparison_chart(
     return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
 
 
+@st.cache_data(show_spinner=False)
 def build_sector_country_heatmap(dark_mode: bool = True) -> go.Figure:
     """Build a sector by country loss percentage heatmap."""
     sectors = ["Technology", "Financial Services", "Energy & Utilities", "Consumer Discretionary", "Industrials"]
@@ -376,6 +379,7 @@ def build_sector_country_heatmap(dark_mode: bool = True) -> go.Figure:
     return apply_plotly_theme(fig, height=300, dark_mode=dark_mode)
 
 
+@st.cache_data(show_spinner=False)
 def build_contagion_cascade_chart(shock_nodes: dict[str, float], dark_mode: bool = True) -> go.Figure:
     """Build a ranked contagion cascade bar chart showing shock propagation across counterparties."""
     sorted_nodes = sorted(shock_nodes.items(), key=lambda x: x[1], reverse=True)[:10] if shock_nodes else []
@@ -427,7 +431,14 @@ def build_contagion_cascade_chart(shock_nodes: dict[str, float], dark_mode: bool
 def build_contagion_network_fig(graph: Any, shock_nodes: dict[str, float], dark_mode: bool = True) -> go.Figure:
     """Build an institutional counterparty network graph."""
     g = getattr(graph, "g", getattr(graph, "graph", graph))
-    pos = nx.spring_layout(g, seed=42)
+    if not hasattr(graph, "_cached_spring_pos"):
+        try:
+            graph._cached_spring_pos = nx.spring_layout(g, seed=42)
+        except Exception:
+            graph._cached_spring_pos = nx.spring_layout(g)
+    pos = getattr(graph, "_cached_spring_pos", None)
+    if pos is None:
+        pos = nx.spring_layout(g, seed=42)
 
     edge_x = []
     edge_y = []
@@ -498,6 +509,7 @@ def build_contagion_network_fig(graph: Any, shock_nodes: dict[str, float], dark_
 # Rebalancer Visualizations (Module A)
 # =====================================================================
 
+@st.cache_data(show_spinner=False)
 def build_rebalance_comparison_chart(
     dates: list[str],
     tilted_cum: list[float],
@@ -568,6 +580,7 @@ def build_rebalance_comparison_chart(
     return apply_plotly_theme(fig, height=440, dark_mode=dark_mode)
 
 
+@st.cache_data(show_spinner=False)
 def build_rebalance_area_chart(weight_history: list[dict[str, Any]], dark_mode: bool = True) -> go.Figure:
     """Build a stacked area chart showing constituent weights over time."""
     rows = []
@@ -596,6 +609,7 @@ def build_rebalance_area_chart(weight_history: list[dict[str, Any]], dark_mode: 
 # Model Calibration Visualizations (Page 5)
 # =====================================================================
 
+@st.cache_data(show_spinner=False)
 def build_calibration_curve(dark_mode: bool = True) -> go.Figure:
     """Build an isotonic calibration curve showing predicted vs empirical move."""
     x_model = np.linspace(0.1, 0.7, 30)
@@ -640,6 +654,7 @@ def build_calibration_curve(dark_mode: bool = True) -> go.Figure:
 # Time Machine Trajectory Chart (Page 6)
 # =====================================================================
 
+@st.cache_data(show_spinner=False)
 def build_time_machine_chart(
     times: list[str],
     portfolio_values: list[float],

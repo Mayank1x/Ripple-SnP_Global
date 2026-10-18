@@ -113,7 +113,7 @@ inject_theme(dark_mode=is_dark)
 # Cached Data Loaders (100% Offline from local cache)
 # =====================================================================
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_signals_data() -> list[dict[str, Any]]:
     """Load processed risk signals from data/signals/signals.jsonl."""
     signals_file = ROOT_DIR / "data" / "signals" / "signals.jsonl"
@@ -130,7 +130,7 @@ def load_signals_data() -> list[dict[str, Any]]:
     return records
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_portfolio_data() -> Portfolio:
     """Load synthetic wholesale banking portfolio."""
     port_file = ROOT_DIR / "data" / "portfolio" / "portfolio.json"
@@ -139,14 +139,14 @@ def load_portfolio_data() -> Portfolio:
     return Portfolio.load(port_file)
 
 
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def get_cached_exposure_graph() -> ExposureGraph:
     """Build and cache the NetworkX counterparty exposure graph."""
     port = load_portfolio_data()
     return build_exposure_graph(port, seed=42)
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_historical_events() -> list[dict[str, Any]]:
     """Load historical crisis events."""
     hist_file = ROOT_DIR / "data" / "calibration" / "historical_shocks.json"
@@ -156,7 +156,7 @@ def load_historical_events() -> list[dict[str, Any]]:
         return json.load(f)
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_rebalance_data() -> dict[str, Any]:
     """Load backtest results for the tactical rebalancer."""
     res_path = ROOT_DIR / "data" / "rebalance" / "backtest_results.json"
@@ -173,7 +173,7 @@ def load_rebalance_data() -> dict[str, Any]:
         return {"error": str(exc)}
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_rebalance_history() -> list[dict[str, Any]]:
     """Load rebalance execution records from data/rebalance/history.jsonl."""
     hist_file = ROOT_DIR / "data" / "rebalance" / "history.jsonl"
@@ -190,7 +190,7 @@ def load_rebalance_history() -> list[dict[str, Any]]:
     return records
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_index_constituents() -> pd.DataFrame:
     """Load constituent stocks for the mock index."""
     const_file = ROOT_DIR / "data" / "index" / "constituents.csv"
@@ -199,7 +199,7 @@ def load_index_constituents() -> pd.DataFrame:
     return pd.DataFrame()
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def load_latest_stress_run() -> dict[str, Any]:
     """Load precomputed stress test execution results."""
     stress_dir = ROOT_DIR / "data" / "stress_runs"
@@ -225,6 +225,7 @@ def load_latest_stress_run() -> dict[str, Any]:
 # Horizontal Range Chart Generator (Before/After Stress with Confidence Band)
 # =====================================================================
 
+@st.cache_data(show_spinner=False)
 def build_horizontal_range_chart(
     pre_val: float,
     post_p50: float,
@@ -324,7 +325,7 @@ def build_horizontal_range_chart(
 # Institutional Top Control Bar with Theme & API Controls
 # =====================================================================
 
-col_brand, col_mode, col_theme = st.columns([3.5, 2.0, 1.2], gap="small")
+col_brand, col_mode, col_theme, col_run = st.columns([3.0, 1.8, 1.1, 1.4], gap="small")
 
 with col_brand:
     brand_sub = "#94A3B8" if is_dark else "#475569"
@@ -332,9 +333,11 @@ with col_brand:
     render_html(
         f"""
         <div style="padding-top: 4px;">
-            <span style="font-size: 1.05rem; font-weight: 600; color: #2D6BFF; letter-spacing: 0.2px;">Ripple Risk Engine</span>
-            <span style="font-size: 0.85rem; color: {brand_sub}; margin-left: 8px;">S&P Global & CRISIL Assessment</span>
-            <div style="font-size: 0.72rem; color: {brand_muted};">Replay Window: 2026-09-08 to 2026-10-16 | Engine Status: Normal (74 Risk Signals)</div>
+            <span style="font-size: 1.05rem; font-weight: 700; color: #2D6BFF; letter-spacing: 0.3px;">RIPPLE RISK ENGINE</span>
+            <span style="font-size: 0.82rem; color: {brand_sub}; margin-left: 8px; font-weight: 500;">S&P Global & CRISIL Assessment</span>
+            <div style="font-size: 0.72rem; color: {brand_muted}; margin-top: 2px;">
+                <span style="color: #10B981; font-weight: 600;">● System Online</span> | Replay Window: 2026-09-08 to 2026-10-16 | Wholesale Book: $8.54B (42 Positions)
+            </div>
         </div>
         """
     )
@@ -361,6 +364,30 @@ with col_theme:
         st.session_state["theme_mode"] = theme_selection
         st.rerun()
 
+with col_run:
+    render_html("<div style='height: 2px;'></div>")
+    is_live = st.session_state["ingestion_mode"] == "Live Stream (API Active)"
+    run_btn_label = "Execute Live Sync" if is_live else "Execute Replay Pipeline"
+    if st.button(
+        run_btn_label,
+        type="primary",
+        use_container_width=True,
+        help="Execute the full NLP analysis, clustering, and portfolio stress testing pipeline right inside Streamlit.",
+        key="btn_run_master_pipeline",
+    ):
+        target_mode = "live" if is_live else "replay"
+        target_query = st.session_state.get("live_search_query", "bank OR default OR inflation")
+        with st.status(f"Executing Ripple Master Pipeline ({target_mode.upper()})...", expanded=True) as status_box:
+            st.write("Step 1: Ingesting articles (GDELT 2.0, NewsAPI/RSS, Tweets)...")
+            from run import run_pipeline
+            run_pipeline(mode=target_mode, query=target_query if target_mode == "live" else None, limit=60)
+            st.write("Step 2: Scored sentiment with FinBERT & categorized events.")
+            st.write("Step 3: Clustered rolling-window events with FAISS.")
+            st.write("Step 4: Executed Module B portfolio stress test on $8.54B book.")
+            status_box.update(label="Pipeline execution completed successfully!", state="complete", expanded=False)
+        st.cache_data.clear()
+        st.rerun()
+
 # Ingestion Mode & API Key Drawer (Visible when Live Stream selected)
 news_key = os.environ.get("NEWSAPI_KEY", "")
 gemini_key = os.environ.get("GEMINI_API_KEY", "")
@@ -376,7 +403,7 @@ if status_path.exists():
         pass
 
 if st.session_state["ingestion_mode"] == "Live Stream (API Active)":
-    with st.expander("Live API Configuration & Ingestion Status", expanded=True):
+    with st.expander("Live API Configuration & Streaming Query", expanded=True):
         api_c1, api_c2, api_c3 = st.columns([1.5, 1.5, 1.0])
         with api_c1:
             masked_news = f"{news_key[:4]}...{news_key[-4:]}" if len(news_key) > 8 else "Missing"
@@ -387,10 +414,16 @@ if st.session_state["ingestion_mode"] == "Live Stream (API Active)":
         with api_c3:
             st.text("Fallback Policy: Active")
 
+        st.session_state["live_search_query"] = st.text_input(
+            "Live Search Query for Feeds",
+            value="bank OR default OR inflation",
+            help="Filter search query passed to GDELT and NewsAPI live query endpoints.",
+        )
+
         if status_banner:
             st.warning(f"Ingestion Fallback Notification: {status_banner}")
         else:
-            st.info("Live streaming active. If an external API becomes unreachable, the pipeline automatically falls back to local cache.")
+            st.info("Live streaming active. Clicking 'Run Live Sync' will ingest the latest financial articles and update all risk analytics in real-time.")
 
 # Main Navigation Tabs (Bound to session_state with key="active_nav")
 nav_page = st.radio(
@@ -954,42 +987,67 @@ elif nav_page == "Stress test":
 
     if scen_col1.button("Default Event Shock", use_container_width=True):
         st.session_state["whatif_dy"] = default_dy
+        st.session_state["slider_dy"] = default_dy
         st.session_state["whatif_dspread"] = default_dspread
+        st.session_state["slider_dspread"] = default_dspread
         st.session_state["whatif_oil"] = default_oil
+        st.session_state["slider_oil"] = default_oil
         st.session_state["whatif_fx"] = default_fx
+        st.session_state["slider_fx"] = default_fx
         st.session_state["whatif_k"] = 2.0
+        st.session_state["slider_k"] = 2.0
         st.rerun()
 
     if scen_col2.button("Rate Spike (+150 bps)", use_container_width=True):
         st.session_state["whatif_dy"] = 150
+        st.session_state["slider_dy"] = 150
         st.session_state["whatif_dspread"] = 40
+        st.session_state["slider_dspread"] = 40
         st.session_state["whatif_oil"] = -5.0
+        st.session_state["slider_oil"] = -5.0
         st.session_state["whatif_fx"] = 2.5
+        st.session_state["slider_fx"] = 2.5
         st.session_state["whatif_k"] = 2.2
+        st.session_state["slider_k"] = 2.2
         st.rerun()
 
     if scen_col3.button("Credit Crisis (+120 bps)", use_container_width=True):
         st.session_state["whatif_dy"] = -15
+        st.session_state["slider_dy"] = -15
         st.session_state["whatif_dspread"] = 120
+        st.session_state["slider_dspread"] = 120
         st.session_state["whatif_oil"] = -12.0
+        st.session_state["slider_oil"] = -12.0
         st.session_state["whatif_fx"] = 2.0
+        st.session_state["slider_fx"] = 2.0
         st.session_state["whatif_k"] = 3.0
+        st.session_state["slider_k"] = 3.0
         st.rerun()
 
     if scen_col4.button("Oil Shock (+35%)", use_container_width=True):
         st.session_state["whatif_dy"] = 40
+        st.session_state["slider_dy"] = 40
         st.session_state["whatif_dspread"] = 55
+        st.session_state["slider_dspread"] = 55
         st.session_state["whatif_oil"] = 35.0
+        st.session_state["slider_oil"] = 35.0
         st.session_state["whatif_fx"] = 1.5
+        st.session_state["slider_fx"] = 1.5
         st.session_state["whatif_k"] = 2.5
+        st.session_state["slider_k"] = 2.5
         st.rerun()
 
     if scen_col5.button("Stagflation Shock", use_container_width=True):
         st.session_state["whatif_dy"] = 120
+        st.session_state["slider_dy"] = 120
         st.session_state["whatif_dspread"] = 90
+        st.session_state["slider_dspread"] = 90
         st.session_state["whatif_oil"] = 25.0
+        st.session_state["slider_oil"] = 25.0
         st.session_state["whatif_fx"] = 3.0
+        st.session_state["slider_fx"] = 3.0
         st.session_state["whatif_k"] = 3.2
+        st.session_state["slider_k"] = 3.2
         st.rerun()
 
     # Sliders

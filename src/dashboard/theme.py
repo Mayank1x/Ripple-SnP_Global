@@ -106,34 +106,38 @@ def render_html(html: str) -> None:
 # Font Loader (Offline Base64 Encoding)
 # =====================================================================
 
-@st.cache_data
 def load_font_face_css() -> str:
-    """Load local IBM Plex Sans TTF files and encode as base64 data URIs."""
-    fonts_dir = Path(__file__).parent / "static" / "fonts"
-    css_rules = []
-    font_files = {
-        ("400", "normal"): fonts_dir / "ibm-plex-sans-400.ttf",
-        ("500", "normal"): fonts_dir / "ibm-plex-sans-500.ttf",
-        ("600", "normal"): fonts_dir / "ibm-plex-sans-600.ttf",
-    }
+    """Return lightweight font-face declarations pointing to static served fonts with system fallbacks."""
+    return """
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/app/static/fonts/ibm-plex-sans-400.ttf') format('truetype'),
+       local('IBM Plex Sans'),
+       local('Segoe UI');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/app/static/fonts/ibm-plex-sans-500.ttf') format('truetype'),
+       local('IBM Plex Sans Medium'),
+       local('Segoe UI Semibold');
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/app/static/fonts/ibm-plex-sans-600.ttf') format('truetype'),
+       local('IBM Plex Sans SemiBold'),
+       local('Segoe UI Bold');
+}
+"""
 
-    for (weight, style), font_path in font_files.items():
-        if font_path.exists():
-            try:
-                b64_data = base64.b64encode(font_path.read_bytes()).decode("utf-8")
-                css_rules.append(
-                    f"""@font-face {{
-font-family: 'IBM Plex Sans';
-font-style: {style};
-font-weight: {weight};
-font-display: swap;
-src: url('data:font/truetype;charset=utf-8;base64,{b64_data}') format('truetype');
-}}"""
-                )
-            except Exception:
-                pass
-
-    return "\n".join(css_rules)
 
 
 # =====================================================================
@@ -494,6 +498,73 @@ div[data-testid="stExpander"] {{
 }}
 div[data-testid="stExpander"] summary span {{
     color: {c_text_primary} !important;
+}}
+
+/* Institutional Buttons */
+div[data-testid="stButton"] button {{
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    padding: 0.38rem 0.85rem !important;
+    transition: all 0.15s ease-in-out !important;
+    border: 1px solid {c_border_strong} !important;
+    background-color: {c_surface} !important;
+    color: {c_text_primary} !important;
+}}
+div[data-testid="stButton"] button:hover {{
+    border-color: {ACCENT_BLUE} !important;
+    color: {ACCENT_BLUE} !important;
+    box-shadow: 0 2px 6px rgba(45, 107, 255, 0.15) !important;
+}}
+div[data-testid="stButton"] button[kind="primary"] {{
+    background-color: {NAVY_DEEP if dark_mode else "#1E40AF"} !important;
+    border: 1px solid {ACCENT_BLUE} !important;
+    color: #FFFFFF !important;
+}}
+div[data-testid="stButton"] button[kind="primary"]:hover {{
+    background-color: {ACCENT_BLUE} !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 8px rgba(45, 107, 255, 0.3) !important;
+}}
+
+/* Institutional Download Buttons */
+div[data-testid="stDownloadButton"] button {{
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    font-size: 0.82rem !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    padding: 0.42rem 1rem !important;
+    border: 1px solid {ACCENT_BLUE} !important;
+    background-color: {'rgba(45, 107, 255, 0.12)' if dark_mode else '#EFF6FF'} !important;
+    color: {'#60A5FA' if dark_mode else '#1D4ED8'} !important;
+    transition: all 0.15s ease-in-out !important;
+}}
+div[data-testid="stDownloadButton"] button:hover {{
+    background-color: {ACCENT_BLUE} !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 3px 8px rgba(45, 107, 255, 0.25) !important;
+}}
+
+/* Institutional Sliders */
+div[data-testid="stSlider"] div[data-baseweb="slider"] {{
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+}}
+div[data-testid="stSlider"] label p {{
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    color: {c_text_primary} !important;
+}}
+
+/* Radio Navigation Tabs Active State */
+div[data-testid="stRadio"] label:has(input:checked) {{
+    background-color: {'rgba(45, 107, 255, 0.16)' if dark_mode else '#DBEAFE'} !important;
+    border-radius: 3px !important;
+}}
+div[data-testid="stRadio"] label:has(input:checked) p {{
+    color: {'#60A5FA' if dark_mode else '#1D4ED8'} !important;
+    font-weight: 600 !important;
 }}
 
 /* Dividers */
