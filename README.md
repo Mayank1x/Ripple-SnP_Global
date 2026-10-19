@@ -4,7 +4,7 @@
 **College Email ID:** mayank.23bai10291@vitbhopal.ac.in  
 **College / Campus:** Vellore Institute of Technology Bhopal  
 **Demo Video Link:** https://youtu.be/zw61wIqWhlY  
-**Presentation Deck:** 
+**Presentation Deck:** https://github.com/Mayank1x/VIT-BHOPAL-MAYANK-RATHORE-HACKATHON/blob/main/docs/presentation.pdf
 
 ---
 
