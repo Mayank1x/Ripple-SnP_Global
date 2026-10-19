@@ -3,8 +3,8 @@
 **Candidate Name:** Mayank Rathore  
 **College Email ID:** mayank.23bai10291@vitbhopal.ac.in  
 **College / Campus:** Vellore Institute of Technology Bhopal  
-**Demo Video Link:** [To be added]  
-**Presentation Deck:** [docs/presentation.md](docs/presentation.md)
+**Demo Video Link:** https://youtu.be/zw61wIqWhlY  
+**Presentation Deck:** 
 
 ---
 
